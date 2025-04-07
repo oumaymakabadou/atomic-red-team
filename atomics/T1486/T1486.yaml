@@ -1,4 +1,4 @@
----
+attack_technique_name: Data Encrypted for Impact
 attack_technique: T1486
 display_name: Data Encrypted for Impact
 atomic_tests:
