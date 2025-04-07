@@ -9,7 +9,7 @@ atomic_tests:
     name: powershell
     command: |
       $targetDirectory = "C:\\"
-      $key = "MySecretKey123" # Clé de chiffrement (peut être modifiée)
+      $key = "MySecretKey123" # Clé de chiffrement
 
       function Encrypt-File {
           param (
