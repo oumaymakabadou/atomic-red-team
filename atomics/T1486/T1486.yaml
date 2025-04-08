@@ -41,13 +41,13 @@ atomic_tests:
           $encryptedFile = "$file.enc"
           
           # Encrypt the file using openssl
-openssl enc -aes-256-cbc -salt -pbkdf2 -iter 10000 -in $file -out $encryptedFile -pass pass:$password
+          openssl enc -aes-256-cbc -salt -pbkdf2 -iter 10000 -in $file -out $encryptedFile -pass pass:$password
           
           if ($LASTEXITCODE -eq 0) {
               Write-Host "Encrypted: $file -> $encryptedFile"
               
               # Delete the original file after successful encryption
-              Remove-Item -Path $file -Force
+              Remove-Item -Path $file -Force -ErrorAction SilentlyContinue
               Write-Host "Deleted: $file"
           } else {
               Write-Host "Failed to encrypt: $file"
