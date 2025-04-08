@@ -41,7 +41,7 @@ atomic_tests:
           $encryptedFile = "$file.enc"
           
           # Encrypt the file using openssl
-          openssl enc -aes-256-cbc -salt -in $file -out $encryptedFile -pass pass:$password
+openssl enc -aes-256-cbc -salt -pbkdf2 -iter 10000 -in $file -out $encryptedFile -pass pass:$password
           
           if ($LASTEXITCODE -eq 0) {
               Write-Host "Encrypted: $file -> $encryptedFile"
