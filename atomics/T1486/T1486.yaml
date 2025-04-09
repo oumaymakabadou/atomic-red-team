@@ -16,7 +16,7 @@ atomic_tests:
     target_directory:
       description: Directory to encrypt and delete files from
       type: path
-      default: C:\TestFolder
+      default: C:\
   dependency_executor_name: powershell
   dependencies:
   - description: |
