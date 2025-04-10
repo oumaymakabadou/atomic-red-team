@@ -16,7 +16,7 @@ atomic_tests:
       target_directory:
         description: Directory to encrypt and delete files from
         type: path
-        default: C:\test_files\
+        default: "C:\\test_files\\"
     dependency_executor_name: powershell
     dependencies:
       - description: |
@@ -25,8 +25,8 @@ atomic_tests:
           if (Get-Command openssl -ErrorAction SilentlyContinue) { exit 0 } else { exit 1 }
         get_prereq_command: |
           Write-Host "Installing OpenSSL..."
-          Invoke-WebRequest "https://slproweb.com/download/Win64OpenSSL_Light-3_2_1.exe" -OutFile "$env:TEMP\openssl-installer.exe"
-          Start-Process "$env:TEMP\openssl-installer.exe" -ArgumentList "/S" -Wait
+          Invoke-WebRequest "https://slproweb.com/download/Win64OpenSSL_Light-3_2_1.exe" -OutFile "$env:TEMP\\openssl-installer.exe"
+          Start-Process "$env:TEMP\\openssl-installer.exe" -ArgumentList "/S" -Wait
           # Validate installation
           if (-Not (Get-Command openssl -ErrorAction SilentlyContinue)) {
               Write-Host "OpenSSL installation failed."
@@ -73,3 +73,4 @@ atomic_tests:
         Write-Host "Encryption and deletion process completed."
       cleanup_command: |
         Write-Host "No cleanup performed for destructive actions. To recover encrypted files, use the decryption password provided."
+        # Note: Ensure that the decryption password is securely stored and accessible.
