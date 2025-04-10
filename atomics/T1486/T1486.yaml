@@ -1,4 +1,4 @@
-yaml file : attack_technique: T1486
+attack_technique: T1486
 display_name: Data Encrypted for Impact (Destructive Version)
 atomic_tests:
 - name: Encrypt and delete files recursively in a test folder
