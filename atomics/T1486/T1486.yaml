@@ -26,6 +26,7 @@ atomic_tests:
           - ".xls"
           - ".xlsx"
           - ".ppt"
+          - ".py"
           - ".pptx"
           - ".pdf"
           - ".txt"
