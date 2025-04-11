@@ -16,11 +16,11 @@ atomic_tests:
       sender_email:
         description: Sender email address
         type: string
-        default: "chaymaoumayma2003@gmail.com"
+        default: "Chaymaoumayma2003@gmail.com"
       recipient_email:
         description: Recipient email address
         type: string
-        default: "chaymabouattour@ieee.org"
+        default: "Victim2025@outlook.fr"
       subject:
         description: Email subject
         type: string
@@ -53,6 +53,7 @@ atomic_tests:
 
         # Simulate sending the email (no actual email is sent)
         try {
+            $credential = New-Object System.Management.Automation.PSCredential("#{sender_email}", (ConvertTo-SecureString "votre_mot_de_passe_d_application" -AsPlainText -Force))
             Send-MailMessage -SmtpServer $smtpServer -Port 587 -UseSsl -From $senderEmail -To $recipientEmail -Subject $subject -Body $body -Attachments $attachmentPath -Credential $credential -ErrorAction Stop
             Write-Host "✅ Phishing email simulated successfully."
         } catch {
