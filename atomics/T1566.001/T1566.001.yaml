@@ -16,11 +16,11 @@ atomic_tests:
       sender_email:
         description: Sender email address
         type: string
-        default: "Chaymaoumayma2003@gmail.com"
+        default: "chaymaoumayma2003@gmail.com"
       recipient_email:
         description: Recipient email address
         type: string
-        default: "Victim2025@outlook.fr"
+        default: "chaymabouattour@ieee.org"
       subject:
         description: Email subject
         type: string
