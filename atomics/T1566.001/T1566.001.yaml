@@ -32,7 +32,7 @@ atomic_tests:
       attachment_path:
         description: Path to the malicious attachment
         type: string
-        default: "$env:TEMP\\PhishingAttachment.xlsm"
+        default: "C:\\temp\\PhishingAttachment.xlsm"
     executor:
       name: powershell
       elevation_required: false
@@ -53,7 +53,7 @@ atomic_tests:
 
         # Simulate sending the email (no actual email is sent)
         try {
-            Send-MailMessage -SmtpServer $smtpServer -From $senderEmail -To $recipientEmail -Subject $subject -Body $body -Attachments $attachmentPath -ErrorAction Stop
+            Send-MailMessage -SmtpServer $smtpServer -Port 587 -UseSsl -From $senderEmail -To $recipientEmail -Subject $subject -Body $body -Attachments $attachmentPath -Credential $credential -ErrorAction Stop
             Write-Host "✅ Phishing email simulated successfully."
         } catch {
             Write-Host "❌ Failed to simulate phishing email: $_"
