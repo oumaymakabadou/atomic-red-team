@@ -1,5 +1,5 @@
 attack_technique: T1486
-display_name: Data Encrypted for Impact (Destructive Version)
+display_name: "Data Encrypted for Impact (Destructive Version)"  # Added quotes around the string
 atomic_tests:
   - name: Encrypt and delete files recursively in a test folder
     auto_generated_guid: custom-guid-1234567890abcdef
@@ -16,7 +16,7 @@ atomic_tests:
       target_directory:
         description: Directory to encrypt and delete files from
         type: path
-        default: "C:\
+        default: "C:\\"  # Properly escaped backslashes
       target_extensions:
         description: List of file extensions to target for encryption
         type: array
