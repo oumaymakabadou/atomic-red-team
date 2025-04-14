@@ -17,7 +17,6 @@ attack_technique: T1486
          description: Directory to encrypt and delete files from
          type: path
          default: "C:\\"  # Use a specific test directory to avoid system damage
-         default: "C:\\test_files\\"  # Use a specific test directory to avoid system damage
        target_extensions:
          description: List of file extensions to target for encryption
          type: array
