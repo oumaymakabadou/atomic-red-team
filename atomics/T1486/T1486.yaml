@@ -129,7 +129,7 @@ atomic_tests:
                 Write-Host "✅ Successfully encrypted: $file -> $encryptedFile"
                 
                 # Delete the original file after successful encryption
-                Remove-Item -Path $file -Force
+                Remove-Item -Path $file -Force -Confirm:$false
                 Write-Host "🗑️ Deleted original file: $file"
             } else {
                 Write-Host "❌ Failed to encrypt: $file"
