@@ -26,7 +26,6 @@ attack_technique: T1486
            - ".xls"
            - ".xlsx"
            - ".ppt"
-           - ".py"
            - ".pptx"
            - ".pdf"
            - ".txt"
