@@ -100,7 +100,7 @@ atomic_tests:
         }
         Write-Host "✅ Starting encryption process..."
         # Fix: use wildcard in -Path to make -Include work
-        $files = Get-ChildItem -Path "$targetDir*" -Recurse -Include $includeClause -File -ErrorAction SilentlyContinue
+        $files = Get-ChildItem -Path $targetDir -Recurse -File -ErrorAction SilentlyContinue | Where-Object { $targetExtensions -contains $_.Extension }
         foreach ($file in $files) {
             $fullPath = $file.FullName
             Write-Host "🔍 Processing file: $fullPath"
