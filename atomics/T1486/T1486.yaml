@@ -1,3 +1,4 @@
+
 attack_technique: T1486
 display_name: Data Encrypted for Impact (Destructive Version)
 atomic_tests:
@@ -139,4 +140,4 @@ atomic_tests:
         Write-Host "✅ Encryption and deletion process completed!"
       cleanup_command: |
         Write-Host "No cleanup performed for destructive actions. To recover encrypted files, use the decryption password provided."
-        # Note: Ensure that the decryption password is securely stored and accessible.
+        # Note: Ensure that the decryption password is securely stored and accessible
