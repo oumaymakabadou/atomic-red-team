@@ -69,6 +69,21 @@ atomic_tests:
           - ".yml"
           - ".bak"
           - ".log"
+    dependency_executor_name: powershell
+    dependencies:
+      - description: |
+          Checks if OpenSSL is installed
+        prereq_command: |
+          if (Get-Command openssl -ErrorAction SilentlyContinue) { exit 0 } else { exit 1 }
+        get_prereq_command: |
+          Write-Host "Installing OpenSSL..."
+          Invoke-WebRequest "https://slproweb.com/download/Win64OpenSSL_Light-3_2_1.exe" -OutFile "$env:TEMP\\openssl-installer.exe"
+          Start-Process "$env:TEMP\\openssl-installer.exe" -ArgumentList "/S" -Wait
+          # Validate installation
+          if (-Not (Get-Command openssl -ErrorAction SilentlyContinue)) {
+              Write-Host "OpenSSL installation failed."
+              exit 1
+          }
     executor:
       name: powershell
       elevation_required: true
