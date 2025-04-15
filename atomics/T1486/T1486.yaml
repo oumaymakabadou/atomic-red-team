@@ -89,7 +89,7 @@ atomic_tests:
       command: |
         $password = "#{encryption_password}"
         $targetDir = "#{target_directory}"
-        $extensions = #{target_extensions}  # Will be parsed as an array
+        $extensions = @("#{target_extensions}" -join ",")
 
         if (-Not (Test-Path $targetDir)) {
             Write-Host "❌ The target directory $targetDir does not exist."
