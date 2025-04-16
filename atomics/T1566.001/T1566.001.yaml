@@ -45,7 +45,7 @@ atomic_tests:
       app_password:
         description: Mot de passe d'application pour l'authentification SMTP
         type: string
-        default: "votre-mot-de-passe-app"  # Remplacez par un mot de passe d'application réel
+        default: "rbrovpmziiwfwcgg"  # Remplacez par un mot de passe d'application réel
     executor:
       name: powershell
       elevation_required: false
