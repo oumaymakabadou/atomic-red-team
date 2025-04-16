@@ -9,34 +9,38 @@ atomic_tests:
     supported_platforms:
       - windows
     input_arguments:
-      smtp_server:
-        description: SMTP server to use
-        type: string
-        default: "smtp.office365.com"
-      sender_email:
-        description: Sender Outlook email address
-        type: string
-        default: "victim2025@outlook.fr"
-      recipient_email:
-        description: Recipient email address
-        type: string
-        default: "chaymaoumayma2003@gmail.com"
-      subject:
-        description: Email subject
-        type: string
-        default: "⚠️ Document important à vérifier"
-      body:
-        description: Email body content
-        type: string
-        default: "Bonjour,\n\nVeuillez consulter le document ci-joint dès que possible.\n\nMerci."
-      attachment_path:
-        description: Path to the malicious attachment
-        type: string
-        default: "C:\\temp\\PhishingAttachment.xlsm"
-      app_password:
-        description: Mot de passe d'application Outlook
-        type: string
-        default: "rbrovpmziiwfwcgg"
+smtp_server:
+  description: Serveur SMTP à utiliser
+  type: string
+  default: "smtp.office365.com"
+    smtp_port:
+      description: Port SMTP
+      type: integer
+      default: 587
+    sender_email:
+      description: Adresse e-mail de l'expéditeur
+      type: string
+      default: "victim2025@outlook.fr"
+    recipient_email:
+      description: Adresse e-mail du destinataire
+      type: string
+      default: "chaymaoumayma2003@gmail.com"
+    subject:
+      description: Objet de l'e-mail
+      type: string
+      default: "⚠️ Document important à vérifier"
+    body:
+      description: Contenu de l'e-mail
+      type: string
+      default: "Bonjour,\n\nVeuillez consulter le document ci-joint dès que possible.\n\nMerci."
+    attachment_path:
+      description: Chemin vers la pièce jointe
+      type: string
+      default: "C:\\temp\\PhishingAttachment.xlsm"
+    app_password:
+      description: Mot de passe d'application Outlook
+      type: string
+      default: "rbrovpmziiwfwcgg"
     executor:
       name: powershell
       elevation_required: false
