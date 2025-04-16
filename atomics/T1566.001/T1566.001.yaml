@@ -20,11 +20,11 @@ atomic_tests:
       sender_email:
         description: Adresse e-mail de l'expéditeur
         type: string
-        default: "votre-email@outlook.fr"  # Remplacez par votre adresse e-mail réelle
+        default: "victim2025@outlook.fr"  # Remplacez par votre adresse e-mail réelle
       recipient_email:
         description: Adresse e-mail du destinataire
         type: string
-        default: "destinataire-email@gmail.com"  # Remplacez par une adresse e-mail réelle
+        default: "chaymaoumayma2003@gmail.com"  # Remplacez par une adresse e-mail réelle
       subject:
         description: Objet de l'e-mail
         type: string
