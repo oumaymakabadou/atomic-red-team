@@ -1,10 +1,10 @@
 attack_technique: T1566.001
 display_name: 'Phishing: Spearphishing Attachment'
 atomic_tests:
-  - name: Simulate sending a phishing email with a malicious attachment via Outlook SMTP
-    auto_generated_guid: custom-guid-phishing-attachment-outlook
+  - name: Simulate sending a phishing email with a malicious attachment via SMTP
+    auto_generated_guid: custom-guid-phishing-attachment
     description: |
-      This test simulates sending a phishing email with a malicious attachment using PowerShell via Outlook SMTP.
+      This test simulates sending a phishing email with a malicious attachment using PowerShell.
       WARNING: THIS IS A SIMULATION AND SHOULD ONLY BE RUN IN A CONTROLLED ENVIRONMENT.
     supported_platforms:
       - windows
@@ -12,11 +12,11 @@ atomic_tests:
       smtp_server:
         description: Serveur SMTP à utiliser
         type: string
-        default: "smtp.office365.com"
+        default: "localhost"  # Utilisez "smtp.office365.com" pour Outlook ou un serveur réel
       smtp_port:
         description: Port SMTP
         type: integer
-        default: 587
+        default: 25  # Utilisez 587 pour Outlook avec SSL
       sender_email:
         description: Adresse e-mail de l'expéditeur
         type: string
@@ -43,7 +43,7 @@ atomic_tests:
         type: string
         default: "C:\\temp\\PhishingAttachment.xlsm"
       app_password:
-        description: Mot de passe d'application Outlook
+        description: Mot de passe d'application pour l'authentification SMTP
         type: string
         default: "rbrovpmziiwfwcgg"
     executor:
@@ -60,9 +60,9 @@ atomic_tests:
         $securePassword = ConvertTo-SecureString "#{app_password}" -AsPlainText -Force
         $credential = New-Object System.Management.Automation.PSCredential($senderEmail, $securePassword)
 
-        Write-Host "📧 Envoi d'un email de phishing simulé via SMTP..."
+        Write-Host "📧 Envoi d'un email simulé via SMTP..."
         try {
-            Send-MailMessage -SmtpServer $smtpServer -Port $smtpPort -UseSsl `
+            Send-MailMessage -SmtpServer $smtpServer -Port $smtpPort `
                 -From $senderEmail -To $recipientEmail `
                 -Subject $subject -Body $body `
                 -Attachments $attachmentPath -Credential $credential -ErrorAction Stop
