@@ -12,11 +12,11 @@ atomic_tests:
       smtp_server:
         description: Serveur SMTP à utiliser
         type: string
-        default: "localhost"  # Utilisez localhost pour Papercut SMTP
+        default: "smtp.office365.com"
       smtp_port:
         description: Port SMTP
         type: integer
-        default: 25
+        default: 587
       sender_email:
         description: Adresse e-mail de l'expéditeur
         type: string
