@@ -36,7 +36,7 @@ atomic_tests:
       app_password:
         description: Mot de passe d'application Outlook
         type: string
-        default: "rydtjqkjbbootxao"
+        default: "DVSFT-4RT9S-KEV5X-LL8YZ-XCSQ8"
     executor:
       name: powershell
       elevation_required: false
