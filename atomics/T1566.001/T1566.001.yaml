@@ -45,7 +45,7 @@ atomic_tests:
       app_password:
         description: Mot de passe d'application pour l'authentification SMTP
         type: string
-        default: "6C33AEC312A925811F5A2A14FE605D21A9B565ACB0A0523BA11112B19D9348266370E4F9A8B042570E629CA3DCD2C3F5"  # Mot de passe/clé API Elastic Email
+        default: "333E920085B283965A4ADDAF674F5CAB5732"  # Mot de passe/clé API Elastic Email
     executor:
       name: powershell
       elevation_required: false
