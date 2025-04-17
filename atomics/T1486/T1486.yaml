@@ -86,7 +86,7 @@ atomic_tests:
     executor:
       name: powershell
       elevation_required: true
-            command: |
+    command: |
         $password = "#{encryption_password}"
         $targetDir = "#{target_directory}"
         $extensions = #{target_extensions}
