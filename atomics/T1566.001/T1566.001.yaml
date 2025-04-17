@@ -12,15 +12,15 @@ atomic_tests:
       smtp_server:
         description: Serveur SMTP à utiliser
         type: string
-        default: "smtp.elasticemail.com"  # Serveur SMTP Elastic Email
+        default: "smtp.gmail.com"
       smtp_port:
         description: Port SMTP
         type: integer
-        default: 2525  # Port SMTP Elastic Email
+        default: 587  # Port TLS
       sender_email:
         description: Adresse e-mail de l'expéditeur
         type: string
-        default: "chaymaoumayma2003@gmail.com"  # Adresse email Elastic Email
+        default: "chaymaoumayma2003@gmail.com"  # Remplacez par une adresse Gmail valide
       recipient_email:
         description: Adresse e-mail du destinataire
         type: string
@@ -45,7 +45,7 @@ atomic_tests:
       app_password:
         description: Mot de passe d'application pour l'authentification SMTP
         type: string
-        default: "333E920085B283965A4ADDAF674F5CAB5732"  # Mot de passe/clé API Elastic Email
+        default: "C:\\temp\\credentials.json"  # Fichier JSON contenant les credentials OAuth2
     executor:
       name: powershell
       elevation_required: false
