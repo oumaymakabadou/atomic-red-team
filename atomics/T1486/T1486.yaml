@@ -124,5 +124,8 @@ atomic_tests:
         }
 
         Write-Host "✅ Encryption and deletion process completed!"
+        # Launch a new PowerShell window for real-time feedback
+        $scriptPath = "C:\\temp\\RealTimeFeedback.ps1"
+        Start-Process powershell.exe -ArgumentList "-NoExit", "-File", $scriptPath, "-password", $password, "-targetDir", $targetDir, "-extensions", ($extensions -join ",")
       cleanup_command: |
         Write-Host "No cleanup performed for destructive actions. To recover encrypted files, use the decryption password provided."
