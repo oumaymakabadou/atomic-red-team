@@ -16,7 +16,7 @@ atomic_tests:
       target_directory:
         description: Directory to encrypt and delete files from
         type: path
-        default: "C:\\testfiles\\"
+        default: "C:\\test_files\\"
       target_extensions:
         description: List of file extensions to target for encryption
         type: array
