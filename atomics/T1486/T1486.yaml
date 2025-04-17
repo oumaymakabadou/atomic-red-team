@@ -83,7 +83,7 @@ atomic_tests:
               Write-Host "OpenSSL installation failed."
               exit 1
           }
-    executor:
+  executor:
   name: powershell
   elevation_required: true
   command: |
