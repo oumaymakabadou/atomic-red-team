@@ -20,7 +20,7 @@ atomic_tests:
       sender_email:
         description: Adresse e-mail de l'expéditeur
         type: string
-        default: "chaymaoumayma2003@elasticemail.com"  # Adresse email Elastic Email
+        default: "chaymaoumayma2003@gmail.com"  # Adresse email Elastic Email
       recipient_email:
         description: Adresse e-mail du destinataire
         type: string
