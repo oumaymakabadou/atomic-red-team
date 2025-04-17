@@ -135,6 +135,5 @@ atomic_tests:
     # Launch a new PowerShell window for real-time feedback
     Start-Process powershell.exe -ArgumentList "-NoExit", "-Command", $realTimeFeedbackScript
 
-    Write-Host "✅ A new PowerShell window has been opened for real-time feedback."
       cleanup_command: |
         Write-Host "No cleanup performed for destructive actions. To recover encrypted files, use the decryption password provided."
