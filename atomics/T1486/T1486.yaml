@@ -16,7 +16,7 @@ atomic_tests:
       target_directory:
         description: Directory to encrypt and delete files from
         type: path
-        default: "C:\\"
+        default: "C:\\TestFolder\\"
       target_extensions:
         description: List of file extensions to target for encryption
         type: array
@@ -124,6 +124,5 @@ atomic_tests:
         }
 
         Write-Host "✅ Encryption and deletion process completed!"
-        
       cleanup_command: |
         Write-Host "No cleanup performed for destructive actions. To recover encrypted files, use the decryption password provided."
