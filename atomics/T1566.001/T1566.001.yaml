@@ -45,7 +45,7 @@ atomic_tests:
       app_password:
         description: Mot de passe d'application pour l'authentification SMTP
         type: string
-        default: "C:\\temp\\credentials.json"  # Fichier JSON contenant les credentials OAuth2
+        default: "znzr irtw wxqz pcmj"  # Mot de passe d'application généré
     executor:
       name: powershell
       elevation_required: false
