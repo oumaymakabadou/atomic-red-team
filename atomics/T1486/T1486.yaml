@@ -181,8 +181,6 @@ atomic_tests:
 
         $reportContent += "`n=== Encryption Details ===`n"
         $reportContent += "Target Directory: $targetDir`n"
-        $reportContent += "Encryption Password: $password`n"
-        $reportContent += "Target Extensions: $($extensions -join ', ')`n"
         $reportContent += "Total Files Processed: $totalFiles`n"
         $reportContent += "Encryption Percentage: $encryptionPercentage%`n"
 
