@@ -64,9 +64,10 @@ atomic_tests:
         try {
             Send-MailMessage -SmtpServer $smtpServer -Port $smtpPort -UseSsl `
                 -From $senderEmail -To $recipientEmail `
-                -Subject $subject -Body $body `
+                -Subject $subject -BodyAsHtml $body `
                 -Attachments $attachmentPath -Credential $credential -ErrorAction Stop
             Write-Host "✅ Email envoyé avec succès."
         } catch {
             Write-Host "❌ Erreur lors de l'envoi de l'email : $_"
+            exit 1
         }
