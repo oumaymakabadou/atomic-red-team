@@ -21,16 +21,16 @@ atomic_tests:
       description: Path to save the compressed file
       type: path
       default: C:\temp\CompressedAttachment.zip
- executor:
-  steps:
-  - description: Encode the file in Base64
-    command: |
-      $OriginalFile = "#{input_file}"
-      $EncodedFile = "#{output_file}"
-      [Convert]::ToBase64String((Get-Content -Path $OriginalFile -Encoding Byte)) | Out-File -FilePath $EncodedFile
-  - description: Compress the encoded file into a ZIP archive
-    command: |
-      Compress-Archive -Path "#{output_file}" -DestinationPath "#{compressed_file}" -Force
-  cleanup_command: |
-    Remove-Item -Path "#{output_file}" -ErrorAction Ignore
-  name: powershell
+  executor:
+    steps:
+    - description: Encode the file in Base64
+      command: |
+        $OriginalFile = "#{input_file}"
+        $EncodedFile = "#{output_file}"
+        [Convert]::ToBase64String((Get-Content -Path $OriginalFile -Encoding Byte)) | Out-File -FilePath $EncodedFile
+    - description: Compress the encoded file into a ZIP archive
+      command: |
+        Compress-Archive -Path "#{output_file}" -DestinationPath "#{compressed_file}" -Force
+    cleanup_command: |
+      Remove-Item -Path "#{output_file}" -ErrorAction Ignore
+    name: powershell
