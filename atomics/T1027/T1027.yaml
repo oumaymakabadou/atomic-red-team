@@ -12,15 +12,15 @@ atomic_tests:
     input_file:
       description: Path of the XLSM file to obfuscate
       type: path
-      default: C:\temp\PhishingAttachment.xlsm
+      default: C:\\temp\\PhishingAttachment.xlsm
     output_file:
       description: Path to save the obfuscated file
       type: path
-      default: C:\temp\ObfuscatedAttachment.txt
+      default: C:\\temp\\ObfuscatedAttachment.txt
     compressed_file:
       description: Path to save the compressed file
       type: path
-      default: C:\temp\CompressedAttachment.zip
+      default: C:\\temp\\CompressedAttachment.zip
   executor:
     steps:
     - description: Encode the file in Base64
