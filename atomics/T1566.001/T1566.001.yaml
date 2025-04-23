@@ -24,7 +24,7 @@ atomic_tests:
       sender_visible_email:
         description: Adresse e-mail visible dans le champ "From"
         type: string
-        default: "hichem.habchi@ccn-services.info"  # Adresse visible dans le champ "From"
+        default: "chaymabouattour@ieee.org"  # Adresse visible dans le champ "From"
       recipient_email:
         description: Adresse e-mail du destinataire
         type: string
