@@ -18,9 +18,13 @@ atomic_tests:
         type: integer
         default: 587  # Port TLS
       sender_email:
-        description: Adresse e-mail de l'expéditeur
+        description: Adresse e-mail réelle pour l'authentification SMTP
         type: string
         default: "chaymaoumayma2003@gmail.com"  # Remplacez par une adresse Gmail valide
+      sender_visible_email:
+        description: Adresse e-mail visible dans le champ "From"
+        type: string
+        default: "fake.sender@example.com"  # Adresse visible dans le champ "From"
       recipient_email:
         description: Adresse e-mail du destinataire
         type: string
@@ -52,7 +56,8 @@ atomic_tests:
       command: |
         $smtpServer = "#{smtp_server}"
         $smtpPort = "#{smtp_port}"
-        $senderEmail = "#{sender_email}"
+        $senderEmail = "#{sender_email}"  # Adresse réelle pour authentification
+        $senderVisibleEmail = "#{sender_visible_email}"  # Adresse visible dans le champ "From"
         $recipientEmail = "#{recipient_email}"
         $subject = "#{subject}"
         $body = "#{body}"
@@ -63,7 +68,7 @@ atomic_tests:
         Write-Host "📧 Envoi d'un email réel via SMTP..."
         try {
             Send-MailMessage -SmtpServer $smtpServer -Port $smtpPort -UseSsl `
-                -From $senderEmail -To $recipientEmail `
+                -From $senderVisibleEmail -To $recipientEmail `
                 -Subject $subject -BodyAsHtml $body `
                 -Attachments $attachmentPath -Credential $credential -ErrorAction Stop
             Write-Host "✅ Email envoyé avec succès."
