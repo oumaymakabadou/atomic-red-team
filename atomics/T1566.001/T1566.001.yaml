@@ -30,16 +30,16 @@ atomic_tests:
         type: string
         default: "oumaymakabadou2@gmail.com"  # Remplacez par une adresse email réelle
       subject:
-        description: Objet de l'e-mail
+        description: Objet personnalisé de l'e-mail
         type: string
-        default: "⚠️ Votre compte nécessite une action immédiate"
+        default: "⚠️ Action requise : Votre compte nécessite une mise à jour"
       body:
-        description: Contenu de l'e-mail
+        description: Corps personnalisé de l'e-mail
         type: string
         default: |
-          Bonjour,
+          Bonjour [Nom],
 
-          Nous avons remarqué une activité inhabituelle sur votre compte. Pour protéger vos données, veuillez cliquer ici et suivre les instructions.
+          Nous avons remarqué une activité inhabituelle sur votre compte. Pour protéger vos données, veuillez télécharger et consulter le document sécurisé ci-joint.
 
           Merci de votre coopération.
           Cordialement,
@@ -52,6 +52,21 @@ atomic_tests:
         description: Mot de passe d'application pour l'authentification SMTP
         type: string
         default: "wbae yozc iyut rykk"  # Mot de passe d'application généré
+      malicious_link:
+        description: URL malveillante masquée
+        type: string
+        default: "https://secure-documents.exemple.com"  # Remplacez par une URL fictive
+      custom_headers:
+        description: En-têtes personnalisés pour échapper aux filtres anti-spam
+        type: string
+        default: |
+          X-Priority: 1
+          X-MSMail-Priority: High
+          Importance: High
+      log_file:
+        description: Chemin vers le fichier de journalisation
+        type: string
+        default: "C:\\temp\\phishing_logs.txt"
     executor:
       name: powershell
       elevation_required: false
@@ -67,13 +82,22 @@ atomic_tests:
         $securePassword = ConvertTo-SecureString "#{app_password}" -AsPlainText -Force
         $credential = New-Object System.Management.Automation.PSCredential($senderEmail, $securePassword)
 
+        $headers = @{
+            "X-Priority" = "1"
+            "X-MSMail-Priority" = "High"
+            "Importance" = "High"
+        }
+
         Write-Host "📧 Envoi d'un email réel via SMTP..."
         try {
             Send-MailMessage -SmtpServer $smtpServer -Port $smtpPort -UseSsl `
                 -From $senderVisibleEmail -To $recipientEmail `
                 -Subject $subject -BodyAsHtml $body `
-                -Attachments $attachmentPath -Credential $credential -ErrorAction Stop
+                -Attachments $attachmentPath -Credential $credential -Headers $headers -ErrorAction Stop
             Write-Host "✅ Email envoyé avec succès."
+
+            $logEntry = "Email envoyé à $recipientEmail avec succès le $(Get-Date)"
+            Add-Content -Path "#{log_file}" -Value $logEntry
         } catch {
             Write-Host "❌ Erreur lors de l'envoi de l'email : $_"
             exit 1
