@@ -24,7 +24,7 @@ atomic_tests:
       sender_visible_email:
         description: Adresse e-mail visible dans le champ "From"
         type: string
-        default: "victim2025@gmail.com"  # Adresse visible dans le champ "From"
+        default: "service-support@exemple.com"  # Utilisez un domaine similaire à celui de l'entreprise cible
       recipient_email:
         description: Adresse e-mail du destinataire
         type: string
@@ -32,20 +32,22 @@ atomic_tests:
       subject:
         description: Objet de l'e-mail
         type: string
-        default: "⚠️ Document important à vérifier"
+        default: "⚠️ Votre compte nécessite une action immédiate"
       body:
         description: Contenu de l'e-mail
         type: string
         default: |
           Bonjour,
 
-          Veuillez consulter le document ci-joint dès que possible.
+          Nous avons remarqué une activité inhabituelle sur votre compte. Pour protéger vos données, veuillez cliquer ici et suivre les instructions.
 
-          Merci.
+          Merci de votre coopération.
+          Cordialement,
+          L'équipe de sécurité
       attachment_path:
-        description: Chemin vers la pièce jointe
+        description: Chemin vers la pièce jointe (générée par T1027)
         type: string
-        default: "C:\\temp\\PhishingAttachment.xlsm"  # Assurez-vous que ce chemin est correct
+        default: "C:\\temp\\CompressedAttachment.zip"  # Référence dynamique au fichier généré par T1027
       app_password:
         description: Mot de passe d'application pour l'authentification SMTP
         type: string
