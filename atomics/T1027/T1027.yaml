@@ -28,7 +28,7 @@ atomic_tests:
     fragment_size:
       description: Size of each fragment in bytes
       type: integer
-      default: 1024
+      default: 2048  # Augmentez la taille des fragments pour éviter des schémas détectables
   executor:
     steps:
     - description: Encrypt the file using AES
@@ -82,6 +82,10 @@ atomic_tests:
             Write-Host "Fichier ObfuscatedAttachment.txt non trouvé."
             exit 1
         }
+    - description: Masquer la signature du fichier
+      command: |
+        $FilePath = "#{compressed_file}"
+        Rename-Item -Path $FilePath -NewName ($FilePath + ".txt")
     cleanup_command: |
       Remove-Item -Path "#{output_file}" -ErrorAction Ignore
       Remove-Item -Path "#{encrypted_file}" -ErrorAction Ignore
