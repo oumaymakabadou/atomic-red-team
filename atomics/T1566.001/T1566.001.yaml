@@ -25,7 +25,6 @@ attack_technique: T1566.001
          description: Adresse e-mail visible dans le champ "From"
          type: string
          default: "chaymabouattour@ieee.org"  # Adresse visible dans le champ "From"
-         default: "victim2025@gmail.com"  # Adresse visible dans le champ "From"
        recipient_email:
          description: Adresse e-mail du destinataire
          type: string
