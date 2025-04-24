@@ -24,7 +24,7 @@ atomic_tests:
       sender_visible_email:
         description: Adresse e-mail visible dans le champ "From"
         type: string
-        default: "service-support@exemple.com"  # Utilisez un domaine similaire à celui de l'entreprise cible
+        default: "chaymabouattour1@gmail.com"  # Utilisez un domaine similaire à celui de l'entreprise cible
       recipient_email:
         description: Adresse e-mail du destinataire
         type: string
