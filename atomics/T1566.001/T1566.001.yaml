@@ -44,6 +44,9 @@ atomic_tests:
           Merci de votre coopération.
           Cordialement,
           L'équipe de sécurité
+
+          Contact : +1 123-456-7890
+          Site web : https://exemple.com
       attachment_path:
         description: Chemin vers la pièce jointe (générée par T1027)
         type: string
