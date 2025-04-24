@@ -85,7 +85,11 @@ atomic_tests:
     - description: Masquer la signature du fichier
       command: |
         $FilePath = "#{compressed_file}"
-        Rename-Item -Path $FilePath -NewName ($FilePath + ".txt")
+        $NewFilePath = $FilePath + ".txt"
+        if (Test-Path $NewFilePath) {
+            Remove-Item -Path $NewFilePath -Force
+        }
+        Rename-Item -Path $FilePath -NewName $NewFilePath
     cleanup_command: |
       Remove-Item -Path "#{output_file}" -ErrorAction Ignore
       Remove-Item -Path "#{encrypted_file}" -ErrorAction Ignore
