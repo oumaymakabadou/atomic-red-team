@@ -56,17 +56,6 @@ atomic_tests:
         description: Mot de passe d'application pour l'authentification SMTP
         type: string
         default: "wbae yozc iyut rykk"  # Mot de passe d'application généré
-      malicious_link:
-        description: URL malveillante masquée
-        type: string
-        default: "https://secure-documents.exemple.com"  # Remplacez par une URL fictive
-      custom_headers:
-        description: En-têtes personnalisés pour échapper aux filtres anti-spam
-        type: string
-        default: |
-          X-Priority: 1
-          X-MSMail-Priority: High
-          Importance: High
       log_file:
         description: Chemin vers le fichier de journalisation
         type: string
@@ -76,7 +65,7 @@ atomic_tests:
       elevation_required: false
       command: |
         $smtpServer = "#{smtp_server}"
-        $smtpPort = "#{smtp_port}"
+        $smtpPort = #{smtp_port}
         $senderEmail = "#{sender_email}"  # Adresse réelle pour authentification
         $senderVisibleEmail = "#{sender_visible_email}"  # Adresse visible dans le champ "From"
         $recipientEmail = "#{recipient_email}"
