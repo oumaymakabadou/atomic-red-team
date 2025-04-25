@@ -32,20 +32,21 @@ atomic_tests:
       subject:
         description: Objet personnalisé de l'e-mail
         type: string
-        default: "⚠️ Action requise : Votre compte nécessite une mise à jour"
+        default: "⚠️ Document important à vérifier"
       body:
         description: Corps personnalisé de l'e-mail
         type: string
         default: |
-          Bonjour [Nom],
-
-          Nous avons remarqué une activité inhabituelle sur votre compte. Pour protéger vos données, veuillez télécharger et consulter le document sécurisé ci-joint.
-
-          Merci de votre coopération.
-          Cordialement,
-          L'équipe de sécurité
-
-          Contact : +1 123-456-7890
+          Bonjour [Nom],<br>
+          Nous avons remarqué une activité inhabituelle sur votre compte. Pour protéger vos données, veuillez télécharger et consulter le document sécurisé ci-joint.<br>
+          <br>
+          ⚠️ IMPORTANT : Si le contenu semble restreint, veuillez cliquer sur "Activer le contenu" pour visualiser le document en entier.<br>
+          <br>
+          Merci de votre coopération.<br>
+          Cordialement,<br>
+          L'équipe de sécurité<br>
+          <br>
+          Contact : +1 123-456-7890<br>
           Site web : https://exemple.com
       attachment_path:
         description: Chemin vers la pièce jointe (générée par T1027)
