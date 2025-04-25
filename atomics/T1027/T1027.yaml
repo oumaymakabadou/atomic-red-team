@@ -1,97 +1,54 @@
 attack_technique: T1027
-display_name: Obfuscated Files or Information with Phishing Integration
+display_name: Obfuscated Files or Information with Phishing Integration (Simplified Version)
 atomic_tests:
-- name: Encode, Compress, and Prepare Phishing File
-  auto_generated_guid: custom-guid-phishing-obfuscation
+- name: Zip Protect and Mask Phishing File
+  auto_generated_guid: custom-guid-phishing-zipmask
   description: |
-    Encodes a phishing file (.xlsm) in Base64, encrypts it using AES, fragments it, compresses it, and prepares it for sending via email.
-    Upon successful execution, the file will be encoded, encrypted, fragmented, compressed, and ready for attachment.
+    Zip a phishing file (.xlsm) with password protection, then rename it to .txt to avoid detection.
+    The recipient must rename the file to .zip and use the password to extract the real XLSM file.
   supported_platforms:
   - windows
   input_arguments:
     input_file:
-      description: Path of the XLSM file to obfuscate
+      description: Path of the XLSM file to protect
       type: path
       default: C:\temp\PhishingAttachment.xlsm
-    output_file:
-      description: Path to save the obfuscated file
+    zip_file:
+      description: Path to save the protected zip
       type: path
-      default: C:\temp\ObfuscatedAttachment.txt
-    compressed_file:
-      description: Path to save the compressed file
+      default: C:\temp\ProtectedAttachment.zip
+    masked_file:
+      description: Path to save the final masked file
       type: path
-      default: C:\temp\CompressedAttachment.zip
-    encrypted_file:
-      description: Path to save the encrypted file
-      type: path
-      default: C:\temp\EncryptedAttachment.bin
-    fragment_size:
-      description: Size of each fragment in bytes
-      type: integer
-      default: 2048  # Augmentez la taille des fragments pour éviter des schémas détectables
+      default: C:\temp\MaskedAttachment.txt
+    zip_password:
+      description: Password for the zip file
+      type: string
+      default: 1234
   executor:
+    name: powershell
     steps:
-    - description: Encrypt the file using AES
+    - description: Create a password-protected zip archive
       command: |
-        $Key = New-Object Byte[] 32
-        [Security.Cryptography.RNGCryptoServiceProvider]::Create().GetBytes($Key)
-        $IV = New-Object Byte[] 16
-        [Security.Cryptography.RNGCryptoServiceProvider]::Create().GetBytes($IV)
-        $OriginalFile = "#{input_file}"
-        $EncryptedFile = "#{encrypted_file}"
-        $AesManaged = New-Object System.Security.Cryptography.AesManaged
-        $AesManaged.Key = $Key
-        $AesManaged.IV = $IV
-        $Encryptor = $AesManaged.CreateEncryptor()
-        $FileStream = New-Object System.IO.FileStream("#{encrypted_file}", [System.IO.FileMode]::Create)
-        $CryptoStream = New-Object System.Security.Cryptography.CryptoStream($FileStream, $Encryptor, [System.Security.Cryptography.CipherMode]::CBC)
-        $BinaryWriter = New-Object System.IO.BinaryWriter($CryptoStream)
-        $BinaryWriter.Write([byte[]](Get-Content -Path $OriginalFile -Encoding Byte))
-        $BinaryWriter.Close()
-        $CryptoStream.Close()
-        $FileStream.Close()
-    - description: Fragment the encrypted file
-      command: |
-        $EncryptedFile = "#{encrypted_file}"
-        $FragmentSize = #{fragment_size}
-        $FragmentCount = 0
-        $FragmentPrefix = "C:\temp\Fragment"
-        $Buffer = New-Object Byte[] $FragmentSize
-        $FileStream = [System.IO.File]::OpenRead($EncryptedFile)
-        while (($BytesRead = $FileStream.Read($Buffer, 0, $Buffer.Length)) -gt 0) {
-            $FragmentPath = "$FragmentPrefix$FragmentCount"
-            $FragmentStream = [System.IO.File]::Create($FragmentPath)
-            $FragmentStream.Write($Buffer, 0, $BytesRead)
-            $FragmentStream.Close()
-            $FragmentCount++
-        }
-        $FileStream.Close()
-    - description: Encode the fragments in Base64
-      command: |
-        $FragmentPrefix = "C:\temp\Fragment"
-        $EncodedFile = "#{output_file}"
-        $Fragments = Get-ChildItem -Path "$FragmentPrefix*"
-        foreach ($Fragment in $Fragments) {
-            [Convert]::ToBase64String((Get-Content -Path $Fragment.FullName -Encoding Byte)) | Out-File -FilePath $EncodedFile -Append
-        }
-    - description: Compress the encoded fragments into a ZIP archive
-      command: |
-        if (Test-Path "#{output_file}") {
-            Compress-Archive -Path "#{output_file}" -DestinationPath "#{compressed_file}" -Force
-        } else {
-            Write-Host "Fichier ObfuscatedAttachment.txt non trouvé."
+        Add-Type -AssemblyName 'System.IO.Compression.FileSystem'
+        $zipPath = "#{zip_file}"
+        $fileToZip = "#{input_file}"
+        $password = "#{zip_password}"
+
+        # Use 7-Zip to create a password-protected zip
+        $sevenZipPath = "C:\Program Files\7-Zip\7z.exe"
+        if (-Not (Test-Path $sevenZipPath)) {
+            Write-Host "7-Zip is required at $sevenZipPath."
             exit 1
         }
-    - description: Masquer la signature du fichier
+        & $sevenZipPath a -tzip $zipPath $fileToZip -p$password
+
+    - description: Mask the zip file as .txt
       command: |
-        $FilePath = "#{compressed_file}"
-        $NewFilePath = $FilePath + ".txt"
-        if (Test-Path $NewFilePath) {
-            Remove-Item -Path $NewFilePath -Force
+        if (Test-Path "#{masked_file}") {
+            Remove-Item -Path "#{masked_file}" -Force
         }
-        Rename-Item -Path $FilePath -NewName $NewFilePath
+        Rename-Item -Path "#{zip_file}" -NewName "#{masked_file}"
+
     cleanup_command: |
-      Remove-Item -Path "#{output_file}" -ErrorAction Ignore
-      Remove-Item -Path "#{encrypted_file}" -ErrorAction Ignore
-      Remove-Item -Path "C:\temp\Fragment*" -ErrorAction Ignore
-    name: powershell
+      Remove-Item -Path "#{zip_file}" -ErrorAction Ignore
