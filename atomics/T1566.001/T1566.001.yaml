@@ -32,30 +32,37 @@ atomic_tests:
       subject:
         description: Objet personnalisé de l'e-mail
         type: string
-        default: "⚠️ Document important à vérifier"
+        default: "⚠️ Action requise : Votre compte nécessite une mise à jour"
       body:
         description: Corps personnalisé de l'e-mail
         type: string
         default: |
-          Bonjour [Nom],<br>
-          Nous avons remarqué une activité inhabituelle sur votre compte. Pour protéger vos données, veuillez télécharger et consulter le document sécurisé ci-joint.<br>
-          <br>
-          ⚠️ IMPORTANT : Si le contenu semble restreint, veuillez cliquer sur "Activer le contenu" pour visualiser le document en entier.<br>
-          <br>
-          Merci de votre coopération.<br>
-          Cordialement,<br>
-          L'équipe de sécurité<br>
-          <br>
-          Contact : +1 123-456-7890<br>
-          Site web : https://exemple.com
+          Bonjour [Nom],
+
+          Nous avons remarqué une activité inhabituelle sur votre compte. Pour protéger vos données, veuillez télécharger et consulter le document sécurisé ci-joint.
+
+          Merci de votre coopération.
+          Cordialement,
+          L'équipe de sécurité
       attachment_path:
-        description: Chemin vers la pièce jointe
+        description: Chemin vers la pièce jointe (générée par T1027)
         type: string
-        default: "C:\\temp\\PhishingAttachment.xlsm"  # Référence directe au fichier téléchargé
+        default: "C:\\temp\\CompressedAttachment.zip.txt"  # Référence dynamique au fichier généré par T1027
       app_password:
         description: Mot de passe d'application pour l'authentification SMTP
         type: string
         default: "wbae yozc iyut rykk"  # Mot de passe d'application généré
+      malicious_link:
+        description: URL malveillante masquée
+        type: string
+        default: "https://secure-documents.exemple.com"  # Remplacez par une URL fictive
+      custom_headers:
+        description: En-têtes personnalisés pour échapper aux filtres anti-spam
+        type: string
+        default: |
+          X-Priority: 1
+          X-MSMail-Priority: High
+          Importance: High
       log_file:
         description: Chemin vers le fichier de journalisation
         type: string
@@ -65,7 +72,7 @@ atomic_tests:
       elevation_required: false
       command: |
         $smtpServer = "#{smtp_server}"
-        $smtpPort = #{smtp_port}
+        $smtpPort = "#{smtp_port}"
         $senderEmail = "#{sender_email}"  # Adresse réelle pour authentification
         $senderVisibleEmail = "#{sender_visible_email}"  # Adresse visible dans le champ "From"
         $recipientEmail = "#{recipient_email}"
