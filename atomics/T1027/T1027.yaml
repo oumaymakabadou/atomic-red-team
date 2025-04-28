@@ -146,9 +146,9 @@ atomic_tests:
             DecodeBase64 = node.nodeTypedValue
         End Function
         "@
-        Set xlApp = CreateObject("Excel.Application")
-        Set xlWorkbook = xlApp.Workbooks.Open("#{input_file}")
-        Set xlModule = xlWorkbook.VBProject.VBComponents.Add(1)
-        xlModule.CodeModule.AddFromString DeobfuscationScript
-        xlWorkbook.Save
-        xlApp.Quit
+        $xlApp = New-Object -ComObject Excel.Application
+        $xlWorkbook = $xlApp.Workbooks.Open("#{input_file}")
+        $xlModule = $xlWorkbook.VBProject.VBComponents.Add(1)
+        $xlModule.CodeModule.AddFromString($DeobfuscationScript)
+        $xlWorkbook.Save()
+        $xlApp.Quit()
