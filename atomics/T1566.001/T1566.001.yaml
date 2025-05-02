@@ -28,7 +28,7 @@ atomic_tests:
       recipient_email:
         description: Adresse e-mail du destinataire
         type: string
-        default: "chaymabouattour1@gmail.com"  # Remplacez par une adresse email réelle
+        default: "chaymabouattour@ieee.org"  # Remplacez par une adresse email réelle
       subject:
         description: Objet personnalisé de l'e-mail
         type: string
