@@ -32,7 +32,6 @@ atomic_tests:
       subject:
         description: Customized subject of the email
         type: string
-        default: "⚠️ Urgent: Please review the attached document"
         default: "Urgent: Please review the attached document"
       body:
         description: Customized body of the email
