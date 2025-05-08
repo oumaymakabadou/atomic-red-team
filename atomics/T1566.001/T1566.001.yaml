@@ -53,7 +53,7 @@ atomic_tests:
       log_file:
         description: Path to the log file
         type: string
-        default: "C:\\temp\\phishing_logs.txt"
+        default: "C:\\Users\\chaym\\phishing_script.log"  # Ensure this matches the path in the Python script
     executor:
       name: powershell
       elevation_required: false
