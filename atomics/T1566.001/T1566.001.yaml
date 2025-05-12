@@ -13,33 +13,33 @@ atomic_tests:
       smtp_port:
         description: SMTP server port
         type: Integer
-        default: 25  # Port SMTP standard
+        default: 25           # Port SMTP standard
       sender_email:
         description: Sender's email address for authentication
         type: String
-        default: ""  # Pas nécessaire avec hMailServer
+        default: ""           # Pas nécessaire avec hMailServer
       sender_visible_email:
         description: Visible sender email address (spoofed)
         type: String
-        default: "chaymabouattour1@gmail.com"  # Adresse falsifiée visible par le destinataire
+        default: "chaymabouattour1@gmail.com"  # Adresse falsifiée visible
       recipient_email:
         description: Recipient's email address
         type: String
-        default: "oumaymakabadou2@gmail.com"
+        default: "oumayma@pfe.com"
       subject:
-        description: Email subject
+        description: Customized subject of the email
         type: String
         default: "⚠️ Urgent: Please review the attached document"
       body:
-        description: Email body content
+        description: Customized body content of the email
         type: String
         default: "Dear User,<br>We have detected unusual activity on your account. To secure your data, please review the attached document as soon as possible.<br>Thank you for your cooperation.<br>Best regards,<br>The Security Team"
       attachment_path:
-        description: Path to the phishing attachment
+        description: Path to the malicious attachment
         type: String
-        default: "C:\\temp\\PhishingAttachment.xlsm"  # Chemin vers la pièce jointe
+        default: "C:\\temp\\PhishingAttachment.xlsm"  # Fichier Excel avec macros manuelles
       app_password:
-        description: App password for SMTP authentication
+        description: Application password for SMTP authentication
         type: String
         default: ""  # Pas nécessaire avec hMailServer
     executor:
