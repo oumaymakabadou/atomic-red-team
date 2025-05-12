@@ -1,10 +1,10 @@
 attack_technique: T1566.001
 display_name: 'Phishing: Spearphishing Attachment'
 atomic_tests:
-  - name: Simulate sending a phishing email with a malicious attachment via SMTP with spoofed From
+  - name: Simulate sending a phishing email with a malicious attachment via SMTP
     auto_generated_guid: custom-guid-phishing-attachment
     description: |
-      This test simulates sending a phishing email with a malicious attachment, while spoofing the From: header.
+      This test simulates sending a phishing email with a malicious attachment using PowerShell.
       WARNING: THIS IS A SIMULATION AND SHOULD ONLY BE RUN IN A CONTROLLED ENVIRONMENT.
     supported_platforms:
       - windows
@@ -12,11 +12,11 @@ atomic_tests:
       smtp_server:
         description: SMTP server to use
         type: string
-        default: "localhost"  # hMailServer in local environment
+        default: "smtp.gmail.com"
       smtp_port:
         description: SMTP port
         type: integer
-        default: 25  # Standard SMTP port
+        default: 587  # TLS Port
       sender_email:
         description: Real email address for SMTP authentication (Return-Path)
         type: string
