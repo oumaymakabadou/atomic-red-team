@@ -1,4 +1,3 @@
----
 attack_technique: T1566
 display_name: Phishing
 atomic_tests:
@@ -22,7 +21,7 @@ atomic_tests:
       sender_visible_email:
         description: Visible sender email address (spoofed)
         type: String
-        default: "chaymabouattour1@gmail.com"
+        default: "chaymabouattour1@gmail.com"  # Adresse falsifiée visible par le destinataire
       recipient_email:
         description: Recipient's email address
         type: String
