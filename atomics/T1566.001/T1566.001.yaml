@@ -1,65 +1,64 @@
 attack_technique: T1566
 display_name: Phishing
 atomic_tests:
-  - name: Send phishing email with attachment
-    description: Simulate sending a phishing email with a malicious attachment.
+  - name: Phishing email with spoofed From (via hMailServer)
+    description: Simulate phishing email sent through local SMTP server with spoofed sender.
     supported_platforms:
       - windows
     input_arguments:
       smtp_server:
         description: SMTP server address
         type: String
-        default: "localhost"  # Serveur SMTP local (hMailServer)
+        default: "127.0.0.1"
       smtp_port:
         description: SMTP server port
         type: Integer
-        default: 25           # Port SMTP standard
+        default: 25
       sender_email:
-        description: Sender's email address for authentication
-        type: String
-        default: ""           # Pas nécessaire avec hMailServer
-      sender_visible_email:
-        description: Visible sender email address (spoofed)
-        type: String
-        default: "chaymabouattour1@gmail.com"  # Adresse falsifiée visible
-      recipient_email:
-        description: Recipient's email address
+        description: Real sender email address (used internally by hMailServer)
         type: String
         default: "oumayma@pfe.com"
+      sender_visible_email:
+        description: Spoofed visible From address
+        type: String
+        default: "chaymabouattour@ieee.org"
+      recipient_email:
+        description: Gmail recipient
+        type: String
+        default: "oumaymakabadou2@gmail.com"
       subject:
-        description: Customized subject of the email
+        description: Email subject
         type: String
         default: "⚠️ Urgent: Please review the attached document"
       body:
-        description: Customized body content of the email
+        description: Email body (HTML)
         type: String
-        default: "Dear User,<br>We have detected unusual activity on your account. To secure your data, please review the attached document as soon as possible.<br>Thank you for your cooperation.<br>Best regards,<br>The Security Team"
+        default: "Dear User,<br>We detected unusual activity. Please review the attached file.<br>Thanks."
       attachment_path:
-        description: Path to the malicious attachment
+        description: Attachment path
         type: String
-        default: "C:\\temp\\PhishingAttachment.xlsm"  # Fichier Excel avec macros manuelles
-      app_password:
-        description: Application password for SMTP authentication
-        type: String
-        default: ""  # Pas nécessaire avec hMailServer
+        default: "C:\\temp\\PhishingAttachment.xlsm"
     executor:
       name: powershell
       command: |
         $smtpServer = "#{smtp_server}"
         $smtpPort = #{smtp_port}
-        $senderVisibleEmail = "#{sender_visible_email}"
-        $recipientEmail = "#{recipient_email}"
+        $senderReal = "#{sender_email}"
+        $senderVisible = "#{sender_visible_email}"
+        $recipient = "#{recipient_email}"
         $subject = "#{subject}"
         $body = "#{body}"
-        $attachmentPath = "#{attachment_path}"
-        Write-Host "📧 Envoi d'un email réel via SMTP..."
+        $attachment = "#{attachment_path}"
+
+        Write-Host "📨 Envoi d'un email avec From: falsifié via hMailServer..."
+
         try {
             Send-MailMessage -SmtpServer $smtpServer -Port $smtpPort `
-                -From $senderVisibleEmail -To $recipientEmail `
+                -From $senderVisible -To $recipient `
                 -Subject $subject -BodyAsHtml $body `
-                -Attachments $attachmentPath -ErrorAction Stop
+                -Attachments $attachment `
+                -ErrorAction Stop
             Write-Host "✅ Email envoyé avec succès."
         } catch {
-            Write-Host "❌ Erreur lors de l'envoi de l'email : $_"
-            exit 1
+            Write-Host "❌ Échec de l'envoi de l'email : $_"
         }
