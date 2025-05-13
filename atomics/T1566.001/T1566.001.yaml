@@ -24,7 +24,7 @@ atomic_tests:
       reply_to_email:
         description: Reply-To email address
         type: string
-        default: "attacker@spoof-test.tn"  # Reply-to address matching Return-Path
+        default: "chayma@pfe.com"  # Reply-to address matching Return-Path
       recipient_email:
         description: Recipient email address
         type: string
