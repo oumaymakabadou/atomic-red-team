@@ -12,11 +12,11 @@ atomic_tests:
       smtp_server:
         description: SMTP server to use
         type: string
-        default: "smtp.gmail.com"  # Use Gmail's SMTP server for testing
+        default: "localhost"  # Use localhost for testing (e.g., hMailServer or Postfix)
       smtp_port:
         description: SMTP port
         type: integer
-        default: 587  # Use port 587 for TLS
+        default: 25  # Standard SMTP port for hMailServer
       sender_email:
         description: Real email address for SMTP authentication (Return-Path)
         type: string
@@ -99,7 +99,7 @@ atomic_tests:
 
         # Configure SMTP client
         $smtpClient = New-Object System.Net.Mail.SmtpClient($smtpServer, $smtpPort)
-        $smtpClient.EnableSsl = $true  # Enable SSL for Gmail
+        $smtpClient.EnableSsl = $false  # Disable SSL for local SMTP server
         $smtpClient.Credentials = New-Object System.Net.NetworkCredential($senderEmail, $appPassword)
 
         # Send the email
