@@ -12,13 +12,13 @@ atomic_tests:
       smtp_server:
         description: SMTP server to use
         type: string
-        default: "smtp.gmail.com"  # Use Gmail's SMTP server for testing
+        default: "smtp.gmail.com"  # Use Gmail's SMTP server
       smtp_port:
         description: SMTP port
         type: integer
         default: 587  # Standard port for Gmail with TLS
       sender_email:
-        description: Real email address for SMTP authentication (Return-Path)
+        description: Real email address for SMTP authentication
         type: string
         default: "chaymaoumayma2003@gmail.com"  # Replace with your Gmail account
       sender_visible_email:
@@ -104,7 +104,7 @@ atomic_tests:
 
         # Configure SMTP client
         $smtpClient = New-Object System.Net.Mail.SmtpClient($smtpServer, $smtpPort)
-        $smtpClient.EnableSsl = $true  # Enable SSL for Gmail or Outlook
+        $smtpClient.EnableSsl = $true  # Enable SSL for Gmail
         $securePassword = ConvertTo-SecureString "$app_password" -AsPlainText -Force
         $smtpClient.Credentials = New-Object System.Management.Automation.PSCredential($senderEmail, $securePassword)
 
