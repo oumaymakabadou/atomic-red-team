@@ -53,7 +53,7 @@ atomic_tests:
       app_password:
         description: Application password for SMTP authentication
         type: string
-        default: "wbae yozc iyut rykk"  # Application password generated for Gmail
+        default: "wbae yozc iyut rykk"  # Generate an app password for Gmail
       log_file:
         description: Path to the log file
         type: string
