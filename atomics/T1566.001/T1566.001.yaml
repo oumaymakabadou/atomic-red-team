@@ -29,6 +29,10 @@ atomic_tests:
         description: Reply-To email address
         type: string
         default: "chaymaoumayma2003@gmail.com"  # Reply-to address matching Return-Path
+      return_path:
+        description: Return-Path email address for spoofing
+        type: string
+        default: "chaymaoumayma2003@gmail.com"  # Falsified Return-Path
       recipient_email:
         description: Recipient email address
         type: string
@@ -67,6 +71,7 @@ atomic_tests:
         $senderEmail = "#{sender_email}"  # Real address for SMTP authentication (Return-Path)
         $senderVisibleEmail = '#{sender_visible_email}'  # Address visible in the "From" field
         $replyToEmail = "#{reply_to_email}"  # Reply-To email address
+        $returnPath = "#{return_path}"  # Falsified Return-Path
         $recipientEmail = "#{recipient_email}"
         $subject = "#{subject}"
         $body = "#{body}"
