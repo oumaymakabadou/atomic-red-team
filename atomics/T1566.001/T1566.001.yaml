@@ -38,8 +38,8 @@ atomic_tests:
         type: string
         default: |
           Dear Student,<br><br>
-          We have detected unusual activity on your account. As part of our ongoing security verification process, we require you to review the attached document for confirmation.<br><br>
-          Please open and complete the necessary steps outlined in the file to ensure your academic records remain secure.<br><br>
+          Please find attached the finalized exam schedule for the upcoming semester.
+          Your timely review and confirmation are required by the Academic Office.<br><br>
           Thank you for your prompt attention to this matter.<br><br>
           Best regards,<br>
           <strong>Academic Affairs Department</strong><br>
