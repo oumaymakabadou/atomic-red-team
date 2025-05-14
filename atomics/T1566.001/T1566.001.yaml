@@ -56,12 +56,12 @@ atomic_tests:
           Contact: chaymabouattour@ieee.com<br><br>
 
           <!-- BEGIN SIGNATURE -->
-          <div style="font-family: Arial, sans-serif; font-size: 12px; color: #333333; border-top: 1px solid #dddddd; padding-top: 8px; margin-top: 16px;">
+          <div style='font-family: Arial, sans-serif; font-size: 12px; color: #333333; border-top: 1px solid #dddddd; padding-top: 8px; margin-top: 16px;'>
             <strong>ENET'Com University</strong><br>
             National School of Electronics and Telecommunications of Sousse<br>
             Route de Gabès, km 0.5 - BP 1173, Sousse, Tunisia<br>
-            Tel: +216 73 500 500 | Website: <a href="https://www.enetcom.rnu.tn " style="color: #0066cc;">www.enetcom.rnu.tn</a><br>
-            <img src="https://www.enetcom.rnu.tn/wp-content/uploads/2023/04/logo-enetcom.png " alt="ENET'Com Logo" width="100" style="margin-top: 5px;">
+            Tel: +216 73 500 500 | Website: <a href='https://www.enetcom.rnu.tn ' style='color: #0066cc;'>www.enetcom.rnu.tn</a><br>
+            <img src='https://www.enetcom.rnu.tn/wp-content/uploads/2023/04/logo-enetcom.png ' alt='ENET'Com Logo' width='100' style='margin-top: 5px;'>
           </div>
           <!-- END SIGNATURE -->
 
@@ -78,6 +78,7 @@ atomic_tests:
     executor:
       name: powershell
       elevation_required: false
+      clear_text_credentials: false
       command: |
         $smtpServer = "#{smtp_server}"
         $smtpPort = #{smtp_port}
@@ -85,7 +86,9 @@ atomic_tests:
         $replyToEmail = "#{reply_to_email}"
         $recipientEmail = "#{recipient_email}"
         $subject = "#{subject}"
-        $body = "#{body}"
+        $body = @'
+        #{body}
+        '@
         $attachmentPath = "#{attachment_path}"
 
         # Create MailMessage object
