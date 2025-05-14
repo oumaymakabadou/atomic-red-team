@@ -17,32 +17,32 @@ atomic_tests:
         description: SMTP server to use
         type: string
         default: "localhost"  # Use localhost for testing (e.g., hMailServer or Postfix)
-      
+
       smtp_port:
         description: SMTP port
         type: integer
         default: 25  # Standard SMTP port for hMailServer
-      
+
       sender_visible_email:
         description: Email address to spoof in the "From" header
         type: string
-        default: '"ENETCom University - Academic Affairs" <diffusion@univeonline.com>'  # Official-looking sender
-      
+        default: '"ENETCom University - Academic Affairs" <academic@enetcom.rnu.tn>'  # Official-looking sender
+
       reply_to_email:
         description: Reply-To email address
         type: string
         default: "chaymaoumayma2003@gmail.com"  # Real attacker-controlled email for replies
-      
+
       recipient_email:
         description: Recipient email address
         type: string
         default: "oumaymakabadou2@gmail.com"  # Replace with actual target email
-      
+
       subject:
         description: Customized subject of the email
         type: string
         default: "[Urgent] Final Exam Schedule Attached - Immediate Review Required"
-      
+
       body:
         description: Customized body content of the email
         type: string
@@ -53,7 +53,7 @@ atomic_tests:
           Best regards,<br>
           <strong>Academic Affairs Department</strong><br>
           ENET'Com University<br>
-          Contact: diffusion@univeonline.com<br><br>
+          Contact: academic@enetcom.rnu.tn<br><br>
 
           <!-- BEGIN SIGNATURE -->
           <div style="font-family: Arial, sans-serif; font-size: 12px; color: #333333; border-top: 1px solid #dddddd; padding-top: 8px; margin-top: 16px;">
@@ -69,7 +69,7 @@ atomic_tests:
         description: Path to the malicious attachment
         type: string
         default: "C:\\temp\\Final_Exam_Schedule.xlsm"  # Rename to appear legitimate
-      
+
       log_file:
         description: Path to the log file
         type: string
