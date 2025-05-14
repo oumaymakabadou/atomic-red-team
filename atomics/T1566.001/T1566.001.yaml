@@ -32,16 +32,29 @@ atomic_tests:
       subject:
         description: Customized subject of the email
         type: string
-        default: "Urgent: Please review the attached document"
+        default: "Final Exam Schedule Attached "
       body:
         description: Customized body content of the email
         type: string
         default: |
-          Dear User,<br>
-          We have detected unusual activity on your account. To secure your data, please review the attached document as soon as possible.<br>
-          Thank you for your cooperation.<br>
+          Dear Student,<br><br>
+          We have detected unusual activity on your account. As part of our ongoing security verification process, we require you to review the attached document for confirmation.<br><br>
+          Please open and complete the necessary steps outlined in the file to ensure your academic records remain secure.<br><br>
+          Thank you for your prompt attention to this matter.<br><br>
           Best regards,<br>
-          The Security Team
+          <strong>Academic Affairs Department</strong><br>
+          ENET'Com University<br>
+          Contact: academic@enetcom.rnu.tn<br><br>
+          
+          <!-- BEGIN SIGNATURE -->
+          <div style='font-family: Arial, sans-serif; font-size: 12px; color: #333333; border-top: 1px solid #dddddd; padding-top: 8px; margin-top: 16px;'>
+            <strong>ENET'Com University</strong><br>
+            National School of Electronics and Telecommunications of Sousse<br>
+            Route de Gabès, km 0.5 - BP 1173, Sousse, Tunisia<br>
+            Tel: +216 73 500 500 | Website: <a href='https://www.enetcom.rnu.tn ' style='color: #0066cc;'>www.enetcom.rnu.tn</a><br>
+            <img src='https://www.enetcom.rnu.tn/wp-content/uploads/2023/04/logo-enetcom.png ' alt='ENET'Com Logo' width='100' style='margin-top: 5px;'>
+          </div>
+          <!-- END SIGNATURE -->
       attachment_path:
         description: Path to the malicious attachment
         type: string
