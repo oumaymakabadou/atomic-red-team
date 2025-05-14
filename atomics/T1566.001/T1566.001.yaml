@@ -38,20 +38,18 @@ atomic_tests:
         type: string
         default: |
           Dear Student,<br><br>
-          Please find attached the finalized exam schedule for the upcoming semester.
+          Please find attached the finalized exam schedule for the upcoming semester.<br>
           Your timely review and confirmation are required by the Academic Office.<br><br>
-          Best regards,<br>
-          
+          Best regards,<br><br>
+    
           <!-- BEGIN SIGNATURE -->
-          <div style='font-family: Arial, sans-serif; font-size: 12px; color: #000000; border-top: 1px solid #dddddd; padding-top: 8px; margin-top: 16px;'>
+          <div style='font-family: Arial, sans-serif; font-size: 14px; color: #000000; border-top: 1px solid #dddddd; padding-top: 8px; margin-top: 16px;'>
             <strong>ENET'Com University</strong><br>
             National School of Electronics and Telecommunications of Sfax<br>
             Route de Tunis, cité el Ons, Technopôle de Sfax - 3018 Sfax<br>
             Tel: +216 73 500 500 | Website: 
-            <a href='https://enetcom.rnu.tn/fr ' style='color: #0066cc; text-decoration: underline;'>
-              www.enetcom.rnu.tn
-            </a><br>
-            <img src='https://www.mastere.tn/wp-content/uploads/2020/07/enetcomlogo.png ' alt='ENET\'Com Logo' width='100' style='margin-top: 5px;'>
+            <a href='https://enetcom.rnu.tn/fr ' style='color: #0066cc; text-decoration: underline;'>www.enetcom.rnu.tn</a><br>
+            <img src='https://www.mastere.tn/wp-content/uploads/2020/07/enetcomlogo.png ' alt='ENET'Com Logo' width='100' style='margin-top: 5px;'>
           </div>
           <!-- END SIGNATURE -->
       attachment_path:
