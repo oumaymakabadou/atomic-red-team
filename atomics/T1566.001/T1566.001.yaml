@@ -8,7 +8,7 @@ atomic_tests:
       This test simulates sending a spearphishing email from ENET'Com University with a spoofed sender address.
       The email includes a convincing message and an official university signature to entice the recipient into opening the attached document.
       WARNING: THIS IS A SIMULATION AND SHOULD ONLY BE RUN IN A CONTROLLED ENVIRONMENT.
-    
+
     supported_platforms:
       - windows
 
@@ -64,7 +64,7 @@ atomic_tests:
             <img src="https://www.enetcom.rnu.tn/wp-content/uploads/2023/04/logo-enetcom.png " alt="ENET'Com Logo" width="100" style="margin-top: 5px;">
           </div>
           <!-- END SIGNATURE -->
-      
+
       attachment_path:
         description: Path to the malicious attachment
         type: string
@@ -90,7 +90,12 @@ atomic_tests:
 
         # Create MailMessage object
         $mailMessage = New-Object System.Net.Mail.MailMessage
-        $mailMessage.From = New-Object System.Net.Mail.MailAddress("#{sender_visible_email}")
+        try {
+            $mailMessage.From = New-Object System.Net.Mail.MailAddress($senderVisibleEmail)
+        } catch {
+            Write-Host "❌ Failed to create sender address: $_"
+            exit 1
+        }
         $mailMessage.To.Add($recipientEmail)
         $mailMessage.Subject = $subject
         $mailMessage.Body = $body
@@ -98,12 +103,12 @@ atomic_tests:
 
         # Add spoofed headers
         $mailMessage.Headers.Add("Reply-To", $replyToEmail)
-        $mailMessage.Headers.Add("Return-Path", "#{reply_to_email}")
+        $mailMessage.Headers.Add("Return-Path", "$replyToEmail")
         $mailMessage.Headers.Add("X-Priority", "1")
         $mailMessage.Headers.Add("X-MSMail-Priority", "High")
         $mailMessage.Headers.Add("Importance", "High")
 
-        # Attach malicious file if it exists
+        # Attach file
         if (Test-Path $attachmentPath) {
             $attachment = New-Object System.Net.Mail.Attachment($attachmentPath)
             $mailMessage.Attachments.Add($attachment)
