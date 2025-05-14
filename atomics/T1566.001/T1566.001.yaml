@@ -37,29 +37,6 @@ atomic_tests:
         description: Customized body content of the email
         type: string
         default: |
-          <style>
-            body {
-              font-family: Arial, sans-serif;
-              font-size: 14px;
-              color: #000000;
-            }
-            a {
-              color: #0066cc;
-              text-decoration: underline;
-            }
-            .signature {
-              font-size: 12px;
-              color: #000000;
-              border-top: 1px solid #dddddd;
-              padding-top: 8px;
-              margin-top: 16px;
-            }
-            .logo {
-              margin-top: 5px;
-              max-width: 100px;
-            }
-          </style>
-          
           Dear Student,<br><br>
           Please find attached the finalized exam schedule for the upcoming semester.<br>
           Your timely review and confirmation are required by the Academic Office.<br><br>
@@ -67,7 +44,7 @@ atomic_tests:
           
           <!-- BEGIN SIGNATURE -->
           <div class="signature">
-            <strong>ENETCom University</strong><br>
+            <strong>ENET'Com University</strong><br>
             National School of Electronics and Telecommunications of Sfax<br>
             Route de Tunis, cité el Ons, Technopôle de Sfax - 3018 Sfax<br>
             Tel: +216 73 500 500 | Website: 
