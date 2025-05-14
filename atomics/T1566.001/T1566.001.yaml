@@ -26,7 +26,7 @@ atomic_tests:
       sender_visible_email:
         description: Email address to spoof in the "From" header
         type: string
-        default: '"ENETCom University" <academic@enetcom.rnu.tn>'  # Official-looking sender
+        default: '"ENETCom University" <chaymabouattour@ieee.com>'  # Official-looking sender
 
       reply_to_email:
         description: Reply-To email address
@@ -53,7 +53,7 @@ atomic_tests:
           Best regards,<br>
           <strong>Academic Affairs Department</strong><br>
           ENET'Com University<br>
-          Contact: academic@enetcom.rnu.tn<br><br>
+          Contact: chaymabouattour@ieee.com<br><br>
 
           <!-- BEGIN SIGNATURE -->
           <div style="font-family: Arial, sans-serif; font-size: 12px; color: #333333; border-top: 1px solid #dddddd; padding-top: 8px; margin-top: 16px;">
