@@ -26,7 +26,7 @@ atomic_tests:
       sender_visible_email:
         description: Email address to spoof in the "From" header
         type: string
-        default: '"ENETCom University - Academic Affairs" <academic@enetcom.rnu.tn>'  # Official-looking sender
+        default: '"ENETCom University" <academic@enetcom.rnu.tn>'  # Official-looking sender
 
       reply_to_email:
         description: Reply-To email address
