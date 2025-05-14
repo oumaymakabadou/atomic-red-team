@@ -45,7 +45,7 @@ atomic_tests:
       attachment_path:
         description: Path to the malicious attachment
         type: string
-        default: "C:\\temp\\PhishingAttachement.xlsm"  # Ensure this matches the actual path
+        default: "C:\\temp\\Final_Exam_Schedule.xlsm"  # Ensure this matches the actual path
       log_file:
         description: Path to the log file
         type: string
