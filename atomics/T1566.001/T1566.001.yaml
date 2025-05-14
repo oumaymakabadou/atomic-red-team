@@ -54,13 +54,9 @@ atomic_tests:
               padding-top: 8px;
               margin-top: 16px;
             }}
-            .logo {{
-              margin-top: 5px;
-              max-width: 100px;
-            }}
           </style>
           
-          Dear Student,<br><br>
+          <body>Dear Student,<br><br>
           Please find attached the finalized exam schedule for the upcoming semester.<br>
           Your timely review and confirmation are required by the Academic Office.<br><br>
           Best regards,<br><br>
@@ -75,6 +71,7 @@ atomic_tests:
             <img src='https://www.mastere.tn/wp-content/uploads/2020/07/enetcomlogo.png ' alt='ENET\'Com Logo' class="logo">
           </div>
           <!-- END SIGNATURE -->
+          </body>
       attachment_path:
         description: Path to the malicious attachment
         type: string
