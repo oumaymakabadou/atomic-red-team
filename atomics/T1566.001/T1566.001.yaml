@@ -20,7 +20,7 @@ atomic_tests:
       sender_visible_email:
         description: Email address to spoof in the "From" header
         type: string
-        default: '"IEEE Notification" <chaymabouattour@ieee.org>'  # Spoofed email address
+        default: '"ENETCOM" <chaymabouattour@ieee.org>'  # Spoofed email address
       reply_to_email:
         description: Reply-To email address
         type: string
