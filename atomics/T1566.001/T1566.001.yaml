@@ -20,7 +20,7 @@ atomic_tests:
       sender_visible_email:
         description: Email address to spoof in the "From" header
         type: string
-        default: '"ENETCOM" <chaymabouattour@ieee.org>'  # Spoofed email address
+        default: '"ENETCOM" <contact@enetcom.rnu.tn>'  # Spoofed email address
       reply_to_email:
         description: Reply-To email address
         type: string
@@ -44,15 +44,15 @@ atomic_tests:
           Best regards,<br>
           <strong>Academic Affairs Department</strong><br>
           ENET'Com University<br>
-          Contact: academic@enetcom.rnu.tn<br><br>
+          Contact: contact@enetcom.rnu.tn<br><br>
           
           <!-- BEGIN SIGNATURE -->
           <div style='font-family: Arial, sans-serif; font-size: 12px; color: #333333; border-top: 1px solid #dddddd; padding-top: 8px; margin-top: 16px;'>
             <strong>ENET'Com University</strong><br>
-            National School of Electronics and Telecommunications of Sousse<br>
-            Route de Gabès, km 0.5 - BP 1173, Sousse, Tunisia<br>
-            Tel: +216 73 500 500 | Website: <a href='https://www.enetcom.rnu.tn ' style='color: #0066cc;'>www.enetcom.rnu.tn</a><br>
-            <img src='https://www.enetcom.rnu.tn/wp-content/uploads/2023/04/logo-enetcom.png ' alt='ENET'Com Logo' width='100' style='margin-top: 5px;'>
+            National School of Electronics and Telecommunications of Sfax<br>
+            Route de Tunis, cité el Ons, Technopôle de Sfax - 3018 Sfax<br>
+            Tel: +216 73 500 500 | Website: <a href='https://enetcom.rnu.tn/fr' style='color: #0066cc;'>www.enetcom.rnu.tn</a><br>
+            <img src='https://enetcom.rnu.tn/storage/uploads/articles/ErQv5U5VnFloE5spJsUsiwPBwyg4LEHO131DIwkL.png ' alt='ENET'Com Logo' width='100' style='margin-top: 5px;'>
           </div>
           <!-- END SIGNATURE -->
       attachment_path:
