@@ -63,7 +63,7 @@ atomic_tests:
       log_file:
         description: Path to the log file
         type: string
-        default: "C:\\Users\\chaym\\phishing_script.log"  # Path for logging the result
+        default: "C:\\temp\\phishing_script.log"  # Path for logging the result
     executor:
       name: powershell
       elevation_required: false
